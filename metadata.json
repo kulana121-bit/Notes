@@ -1,0 +1,7 @@
+{
+  "name": "HTML Notes",
+  "description": "A quiet home for your notes with a liquid-glass finish, full-screen Zen reading mode, HTML rendering, timer & stopwatch, and local Room persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
