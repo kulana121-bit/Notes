@@ -142,9 +142,9 @@ fun MarkdownReadView(
                         Box(
                             modifier = Modifier
                                 .size(20.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(if (block.checked) colors.accentSecondary else colors.field)
-                                .border(1.dp, if (block.checked) colors.accentSecondary else colors.hairline, RoundedCornerShape(6.dp)),
+                                .border(1.dp, if (block.checked) colors.accentSecondary else colors.hairline, RoundedCornerShape(24.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             if (block.checked) {
@@ -179,7 +179,7 @@ fun MarkdownReadView(
                             modifier = Modifier
                                 .width(3.dp)
                                 .height(24.dp)
-                                .clip(RoundedCornerShape(2.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(colors.accentSecondary)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -200,9 +200,9 @@ fun MarkdownReadView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(colors.field)
-                            .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
+                            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
                             .padding(12.dp)
                     ) {
                         Text(

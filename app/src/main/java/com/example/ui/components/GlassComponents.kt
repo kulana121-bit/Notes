@@ -45,6 +45,40 @@ import com.example.ui.theme.LocalThemeTransition
 import com.example.util.VibrationHelper
 
 @Composable
+fun GlassBox(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(32.dp),
+    elevation: Dp = 8.dp,
+    content: @Composable () -> Unit
+) {
+    val colors = GlassTheme.colors
+    val isReduced = colors.isReduced
+
+    val bgModifier = if (isReduced) {
+        Modifier.background(colors.card, shape)
+    } else {
+        Modifier.background(
+            Brush.verticalGradient(
+                listOf(
+                    colors.glass,
+                    colors.glass.copy(alpha = (colors.glass.alpha * 0.95f))
+                )
+            ),
+            shape
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .shadow(if (isReduced) 0.dp else elevation, shape, ambientColor = colors.shadow, spotColor = colors.shadow)
+            .then(bgModifier)
+            .border(1.dp, colors.glassBorder, shape)
+    ) {
+        content()
+    }
+}
+
+@Composable
 fun GlassIconButton(
     icon: ImageVector,
     contentDescription: String?,

@@ -85,7 +85,7 @@ fun ClockSheet(
             // Segment switch for Timer / Stopwatch
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .padding(3.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -130,7 +130,7 @@ fun ClockSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onDismiss() }
                     .padding(14.dp),
@@ -160,7 +160,7 @@ private fun ClockSegmentButton(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(9.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(if (isSelected) colors.card else Color.Transparent)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 6.dp)
@@ -255,7 +255,7 @@ private fun TimerContent(
         // Stepper
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(11.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(colors.field)
                 .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -264,7 +264,7 @@ private fun TimerContent(
                 modifier = Modifier
                     .width(36.dp)
                     .height(32.dp)
-                    .clip(RoundedCornerShape(9.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable { onSetMinutes(maxOf(1, timerState.durationMinutes - 1)) },
                 contentAlignment = Alignment.Center
             ) {
@@ -283,7 +283,7 @@ private fun TimerContent(
                 modifier = Modifier
                     .width(36.dp)
                     .height(32.dp)
-                    .clip(RoundedCornerShape(9.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable { onSetMinutes(minOf(999, timerState.durationMinutes + 1)) },
                 contentAlignment = Alignment.Center
             ) {
@@ -303,7 +303,7 @@ private fun TimerContent(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onReset() }
                     .padding(14.dp),
@@ -324,7 +324,7 @@ private fun TimerContent(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(primaryBg)
                 .clickable {
                     when {
@@ -412,7 +412,7 @@ private fun StopwatchContent(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onReset() }
                     .padding(14.dp),
@@ -426,7 +426,7 @@ private fun StopwatchContent(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onLap() }
                     .padding(14.dp),
@@ -447,7 +447,7 @@ private fun StopwatchContent(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(primaryBg)
                 .clickable {
                     when {

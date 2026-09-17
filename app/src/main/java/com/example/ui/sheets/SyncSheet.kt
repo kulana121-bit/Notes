@@ -128,12 +128,12 @@ fun SyncSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(32.dp))
                     .background(colors.field)
                     .border(
                         1.dp,
                         if (googleUser != null) Color(0xFF4285F4).copy(alpha = 0.35f) else colors.hairline,
-                        RoundedCornerShape(20.dp)
+                        RoundedCornerShape(32.dp)
                     )
                     .padding(16.dp)
             ) {
@@ -197,7 +197,7 @@ fun SyncSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(Color(0xFF4285F4))
                             .clickable { onSignInGoogle() }
                             .padding(vertical = 11.dp),
@@ -226,9 +226,9 @@ fun SyncSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(colors.card)
-                            .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
+                            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
                             .clickable { onChooseDeviceAccount() }
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
@@ -254,9 +254,9 @@ fun SyncSheet(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(colors.card)
-                            .border(1.dp, Color(0xFF4285F4).copy(alpha = 0.25f), RoundedCornerShape(14.dp))
+                            .border(1.dp, Color(0xFF4285F4).copy(alpha = 0.25f), RoundedCornerShape(24.dp))
                             .padding(12.dp)
                     ) {
                         Row(
@@ -303,7 +303,7 @@ fun SyncSheet(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(24.dp))
                                     .background(colors.field)
                                     .clickable { onChooseDeviceAccount() }
                                     .padding(vertical = 7.dp),
@@ -319,7 +319,7 @@ fun SyncSheet(
 
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(24.dp))
                                     .background(colors.field)
                                     .clickable { onSignOutGoogle() }
                                     .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -364,7 +364,7 @@ fun SyncSheet(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(Color(0xFF4285F4))
                                 .clickable { onBackupToDrive() }
                                 .padding(vertical = 10.dp),
@@ -390,9 +390,9 @@ fun SyncSheet(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(colors.card)
-                                .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
+                                .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
                                 .clickable { onRestoreFromDrive() }
                                 .padding(vertical = 10.dp),
                             contentAlignment = Alignment.Center
@@ -450,145 +450,13 @@ fun SyncSheet(
             Spacer(modifier = Modifier.height(14.dp))
 
             // ==========================================
-            // SECTION 2: DEVICE STORAGE & LOCAL SYNC
-            // ==========================================
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(colors.field)
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(if (isPdfMode) Color(0xFFDC2626) else Color(0xFF34C759))
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = if (isPdfMode) "Full Device PDF Sync" else "Full Device HTML Sync",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.text,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(999.dp))
-                            .background(colors.chipOnBg)
-                            .clickable {
-                                onDismiss()
-                                if (isPdfMode) onSyncPdfDevice() else onSyncFullDevice()
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "Scan All",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = colors.chipOnTx
-                        )
-                    }
-                }
-
-                Text(
-                    text = if (isPdfMode) {
-                        "Automatically indexes and discovers all PDF documents across your phone (Documents, Downloads, Books, storage, and MediaStore) with zero quality loss."
-                    } else {
-                        "Automatically indexes and syncs every .html and .htm file found across your phone (Documents, Downloads, storage, and MediaStore)."
-                    },
-                    fontSize = 12.5.sp,
-                    lineHeight = 17.sp,
-                    color = colors.textSecondary,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-
-                if (lastSyncTime > 0L) {
-                    Text(
-                        text = "Last device scan: ${DateFormatter.fmtClock(lastSyncTime)}",
-                        fontSize = 11.5.sp,
-                        color = colors.textTertiary,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Action: Full Device PDF Scan
-            SyncActionRow(
-                icon = Icons.Default.PictureAsPdf,
-                label = "Scan device for PDF Documents",
-                sub = "Search phone storage for all .pdf books and files",
-                onClick = {
-                    onDismiss()
-                    onSyncPdfDevice()
-                }
-            )
-
-            // Action: Full Device HTML Scan
-            SyncActionRow(
-                icon = Icons.Default.Html,
-                label = "Scan device for HTML Notes",
-                sub = "Search phone storage for .html & .htm notes",
-                onClick = {
-                    onDismiss()
-                    onSyncFullDevice()
-                }
-            )
-
-            // Current Sync Folder Option
-            val hasFolder = !syncFolderName.isNullOrEmpty()
-            SyncActionRow(
-                icon = if (hasFolder) Icons.Default.FolderOpen else Icons.Default.CreateNewFolder,
-                label = if (hasFolder) "Synced folder: $syncFolderName" else "Select custom sync folder",
-                sub = if (hasFolder) "Tap to change folder" else "Limit auto-sync to a specific directory",
-                onClick = { onDismiss(); onSelectFolder() }
-            )
-
-            if (hasFolder) {
-                SyncActionRow(
-                    icon = Icons.Default.Sync,
-                    label = "Sync selected folder now",
-                    sub = "Scan $syncFolderName and update notes",
-                    onClick = {
-                        onDismiss()
-                        onSyncNow()
-                    }
-                )
-            }
-
-            // Action: Import individual PDF files
-            SyncActionRow(
-                icon = Icons.Default.PictureAsPdf,
-                label = "Import PDF Document",
-                sub = "Select and import a PDF file to read with dynamic zoom",
-                onClick = { onDismiss(); onImportPdf() }
-            )
-
-            // Action: Import individual HTML / Text files
-            SyncActionRow(
-                icon = Icons.Default.UploadFile,
-                label = "Import HTML / Text files",
-                sub = "Pick specific .html, .md, or .txt documents",
-                onClick = { onDismiss(); onImportFiles() }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // ==========================================
-            // SECTION 3: SYSTEM DELETION & DEDUPLICATION SETTINGS
+// SECTION 3: SYSTEM DELETION & DEDUPLICATION SETTINGS
             // ==========================================
             // Delete from device when deleted in app switch
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -596,7 +464,7 @@ fun SyncSheet(
                 Box(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(Color(0xFFFF3B30).copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -638,7 +506,7 @@ fun SyncSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -646,7 +514,7 @@ fun SyncSheet(
                 Box(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.card),
                     contentAlignment = Alignment.Center
                 ) {
@@ -688,7 +556,7 @@ fun SyncSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(Color(0xFF34C759).copy(alpha = 0.08f))
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -714,7 +582,7 @@ fun SyncSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onDismiss() }
                     .padding(14.dp),
@@ -746,7 +614,7 @@ private fun SyncActionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -758,7 +626,7 @@ private fun SyncActionRow(
         Box(
             modifier = Modifier
                 .size(34.dp)
-                .clip(RoundedCornerShape(11.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(colors.field),
             contentAlignment = Alignment.Center
         ) {

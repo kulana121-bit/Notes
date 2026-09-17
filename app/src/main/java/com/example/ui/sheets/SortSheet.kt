@@ -104,7 +104,7 @@ fun SortSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onDismiss() }
                     .padding(14.dp),
@@ -136,7 +136,7 @@ private fun SortOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -148,7 +148,7 @@ private fun SortOptionRow(
         Box(
             modifier = Modifier
                 .size(34.dp)
-                .clip(RoundedCornerShape(11.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(colors.field),
             contentAlignment = Alignment.Center
         ) {

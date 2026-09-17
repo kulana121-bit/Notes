@@ -53,7 +53,7 @@ fun NoteRowItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = ripple(bounded = true),
@@ -106,7 +106,7 @@ fun NoteRowItem(
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(5.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(colors.chipOnBg)
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
@@ -122,7 +122,7 @@ fun NoteRowItem(
                         Spacer(modifier = Modifier.width(6.dp))
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(5.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(Color(0xFFDC2626))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {

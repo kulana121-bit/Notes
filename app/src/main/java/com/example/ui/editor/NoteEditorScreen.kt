@@ -183,13 +183,13 @@ fun NoteEditorScreen(
                             .fillMaxWidth()
                             .shadow(
                                 elevation = if (colors.isReduced) 0.dp else 12.dp,
-                                shape = RoundedCornerShape(20.dp),
+                                shape = RoundedCornerShape(32.dp),
                                 ambientColor = colors.shadow,
                                 spotColor = colors.shadow
                             )
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(32.dp))
                             .background(colors.glass)
-                            .border(1.dp, colors.glassBorder, RoundedCornerShape(20.dp))
+                            .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
                             .padding(horizontal = 10.dp, vertical = 8.dp)
                     ) {
                         Row(
@@ -245,7 +245,7 @@ fun NoteEditorScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
+                                            .clip(RoundedCornerShape(24.dp))
                                             .background(if (isHtml) Color(0xFFE44D26) else Color(0xFF2563EB))
                                             .padding(horizontal = 4.dp, vertical = 1.dp)
                                     ) {
@@ -540,10 +540,10 @@ fun NoteEditorScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .shadow(16.dp, RoundedCornerShape(22.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
-                            .clip(RoundedCornerShape(22.dp))
+                            .shadow(16.dp, RoundedCornerShape(32.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
+                            .clip(RoundedCornerShape(32.dp))
                             .background(colors.glass)
-                            .border(1.dp, colors.glassBorder, RoundedCornerShape(22.dp))
+                            .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Row(
@@ -553,7 +553,7 @@ fun NoteEditorScreen(
                             // Mode Segment Toggle (Code / Preview or Edit / Read)
                             Row(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(14.dp))
+                                    .clip(RoundedCornerShape(24.dp))
                                     .background(colors.field)
                                     .padding(2.dp)
                             ) {
@@ -594,7 +594,7 @@ fun NoteEditorScreen(
                                 // JS Toggle Chip
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(if (isJsEnabled) Color(0xFF34C759).copy(alpha = 0.18f) else colors.field)
                                         .clickable { isJsEnabled = !isJsEnabled }
                                         .padding(horizontal = 9.dp, vertical = 6.dp)
@@ -646,7 +646,7 @@ fun NoteEditorScreen(
                                 // Font size pill
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(colors.field)
                                         .padding(horizontal = 8.dp, vertical = 5.dp)
                                 ) {
@@ -681,7 +681,7 @@ fun NoteEditorScreen(
                                 // Beautify / Auto Format HTML Button
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(colors.field)
                                         .telegramBounceClickable {
                                             val formatted = formatHtmlSnippet(bodyTextFieldValue.text)
@@ -700,7 +700,7 @@ fun NoteEditorScreen(
                                 // AI Code Fix / Explain Button in Lower Bar
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(Color(0xFFA855F7).copy(alpha = 0.16f))
                                         .telegramBounceClickable {
                                             onAskGemini?.invoke(
@@ -748,7 +748,7 @@ fun NoteEditorScreen(
 
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(colors.field)
                                         .padding(horizontal = 8.dp, vertical = 5.dp)
                                 ) {
@@ -913,7 +913,7 @@ private fun EditorSegmentButton(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(11.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(if (isSelected) colors.card else Color.Transparent)
             .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 6.dp)

@@ -99,7 +99,7 @@ private fun ToolbarTextButton(
     Box(
         modifier = Modifier
             .size(34.dp)
-            .clip(RoundedCornerShape(9.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -128,7 +128,7 @@ private fun ToolbarIconButton(
     Box(
         modifier = Modifier
             .size(34.dp)
-            .clip(RoundedCornerShape(9.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -211,7 +211,7 @@ private fun ToolbarTagPill(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(colors.field)
             .clickable(
                 interactionSource = interaction,
