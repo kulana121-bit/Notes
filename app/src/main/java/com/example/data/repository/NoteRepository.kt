@@ -334,9 +334,6 @@ class NoteRepository(
         var upd = 0
         var dupes = 0
         var errs = 0
-        val notesToInsert = mutableListOf<NoteEntity>()
-        val notesToUpdate = mutableListOf<NoteEntity>()
-
         try {
             val root = JSONObject(jsonString)
             val array = root.optJSONArray("notes") ?: return@withContext ImportResult(0, 0, 0, 1)
@@ -380,7 +377,7 @@ class NoteRepository(
                             updatedAt = updatedAt,
                             hash = hash
                         )
-                        notesToUpdate.add(updated)
+                        noteDao.updateNote(updated)
                         upd++
                     } else {
                         dupes++
@@ -407,14 +404,8 @@ class NoteRepository(
                     updatedAt = updatedAt,
                     hash = hash
                 )
-                notesToInsert.add(note)
+                noteDao.insertNote(note)
                 neu++
-            }
-            if (notesToInsert.isNotEmpty()) {
-                noteDao.insertNotes(notesToInsert)
-            }
-            if (notesToUpdate.isNotEmpty()) {
-                noteDao.updateNotes(notesToUpdate)
             }
         } catch (_: Exception) {
             errs++
