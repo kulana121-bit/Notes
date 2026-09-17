@@ -123,7 +123,7 @@ fun NoteEditorScreen(
     var mode by remember(note.id) { mutableStateOf(defaultMode) }
 
     var isZenMode by remember(note.id, initialZenMode) { mutableStateOf(initialZenMode) }
-    var isJsEnabled by remember(note.id) { mutableStateOf(false) }
+    var isJsEnabled by remember(note.id) { mutableStateOf(true) }
     var reloadTrigger by remember { mutableLongStateOf(0L) }
     var saveStatus by remember { mutableStateOf("Saved") }
     var dynamicFontSize by remember(fontSize) { mutableIntStateOf(fontSize) }
