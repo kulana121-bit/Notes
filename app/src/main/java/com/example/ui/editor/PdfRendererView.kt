@@ -441,7 +441,7 @@ fun PdfRendererView(
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.accent)
                         .clickable { onBack() }
                         .padding(horizontal = 20.dp, vertical = 10.dp)
@@ -566,9 +566,9 @@ fun PdfRendererView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = statusBarTop + 6.dp, start = 12.dp, end = 12.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(32.dp))
                         .background(colors.glass)
-                        .border(1.dp, colors.glassBorder, RoundedCornerShape(20.dp))
+                        .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Row(
@@ -619,7 +619,7 @@ fun PdfRendererView(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(4.dp))
+                                        .clip(RoundedCornerShape(24.dp))
                                         .background(Color(0xFFDC2626))
                                         .padding(horizontal = 4.dp, vertical = 1.dp)
                                 ) {
@@ -729,10 +729,10 @@ fun PdfRendererView(
             ) {
                 Box(
                     modifier = Modifier
-                        .shadow(16.dp, RoundedCornerShape(22.dp))
-                        .clip(RoundedCornerShape(22.dp))
+                        .shadow(16.dp, RoundedCornerShape(32.dp))
+                        .clip(RoundedCornerShape(32.dp))
                         .background(colors.glass)
-                        .border(1.dp, colors.glassBorder, RoundedCornerShape(22.dp))
+                        .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Row(
@@ -768,7 +768,7 @@ fun PdfRendererView(
                         // Page Jump / Scrubber Trigger Pill
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(colors.field)
                                 .clickable {
                                     jumpPageInput = currentPage.toString()
@@ -997,7 +997,7 @@ fun PdfRendererView(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(colors.field)
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     )
@@ -1026,7 +1026,7 @@ fun PdfRendererView(
                 }
             },
             containerColor = colors.card,
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(32.dp)
         )
     }
 }
@@ -1073,10 +1073,10 @@ private fun PdfPageCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(pageCardBg)
-            .border(1.dp, if (paperTheme == PdfPaperTheme.DEFAULT) Color(0x1F000000) else Color(0x22FFFFFF), RoundedCornerShape(14.dp))
-            .shadow(if (paperTheme == PdfPaperTheme.DEFAULT) 3.dp else 0.dp, RoundedCornerShape(14.dp))
+            .border(1.dp, if (paperTheme == PdfPaperTheme.DEFAULT) Color(0x1F000000) else Color(0x22FFFFFF), RoundedCornerShape(24.dp))
+            .shadow(if (paperTheme == PdfPaperTheme.DEFAULT) 3.dp else 0.dp, RoundedCornerShape(24.dp))
             .padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -1087,7 +1087,7 @@ private fun PdfPageCard(
                 colorFilter = colorFilter,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(24.dp))
             )
         } else {
             Box(

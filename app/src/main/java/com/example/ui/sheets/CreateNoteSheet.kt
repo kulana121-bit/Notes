@@ -108,7 +108,7 @@ fun CreateNoteSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .telegramBounceClickable { onDismiss() }
                     .padding(14.dp),
@@ -140,7 +140,7 @@ private fun CreateOptionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(32.dp))
             .telegramBounceClickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -148,7 +148,7 @@ private fun CreateOptionItem(
         Box(
             modifier = Modifier
                 .size(46.dp)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(colors.chipOnBg),
             contentAlignment = Alignment.Center
         ) {

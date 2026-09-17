@@ -138,7 +138,7 @@ class NoteRepository(
             HashUtil.noteHash(note.title, note.content)
         }
         noteDao.insertNote(note.copy(hash = hash))
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun updateNote(note: NoteEntity) = withContext(Dispatchers.IO) {
@@ -148,22 +148,22 @@ class NoteRepository(
             HashUtil.noteHash(note.title, note.content)
         }
         noteDao.updateNote(note.copy(hash = hash, updatedAt = System.currentTimeMillis()))
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun moveToTrash(id: String) = withContext(Dispatchers.IO) {
         noteDao.moveToTrash(id, System.currentTimeMillis())
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun restoreFromTrash(id: String) = withContext(Dispatchers.IO) {
         noteDao.restoreFromTrash(id)
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun restoreAllFromTrash() = withContext(Dispatchers.IO) {
         noteDao.restoreAllFromTrash()
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun deletePhysicalSourceFile(note: NoteEntity): Boolean = withContext(Dispatchers.IO) {
@@ -188,6 +188,16 @@ class NoteRepository(
                         deleted = rows > 0
                     } catch (_: Throwable) {}
                 }
+                // Fallback for MediaStore Document Tree URIs
+                if (!deleted && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    try {
+                         val rows = context.contentResolver.delete(uri, null, null)
+                         deleted = rows > 0
+                    } catch (_: SecurityException) {
+                        // Needs user permission to delete from media store on Android 10+
+                    }
+                }
+
             } else {
                 val path = if (source.startsWith("file://")) {
                     Uri.parse(source).path ?: source.removePrefix("file://")
@@ -226,7 +236,7 @@ class NoteRepository(
             }
         }
         noteDao.emptyTrash()
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
         filesDeleted
     }
 
@@ -239,7 +249,7 @@ class NoteRepository(
             googleDriveService.removeNoteFromBackup(token, id, user.email)
         }
         noteDao.deleteNotePermanently(id)
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
         fileDeleted
     }
 
@@ -252,20 +262,20 @@ class NoteRepository(
             fileDeleted = deletePhysicalSourceFile(note)
         }
         noteDao.moveToTrash(id, System.currentTimeMillis())
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
         fileDeleted
     }
 
     suspend fun deleteAllNotes() = withContext(Dispatchers.IO) {
         noteDao.deleteAllNotes()
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun togglePin(id: String) = withContext(Dispatchers.IO) {
         val note = noteDao.getNoteByIdDirect(id) ?: return@withContext
         val updated = note.copy(pinned = !note.pinned)
         noteDao.updateNote(updated)
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun duplicateNote(id: String): NoteEntity? = withContext(Dispatchers.IO) {
@@ -284,7 +294,7 @@ class NoteRepository(
             hash = HashUtil.noteHash(newTitle, original.content)
         )
         noteDao.insertNote(duplicate)
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
         duplicate
     }
 
@@ -457,7 +467,7 @@ class NoteRepository(
             val importResult = importBackupJson(jsonStr)
             val now = System.currentTimeMillis()
             updateSettings { it.copy(lastGoogleDriveBackupTime = now) }
-            com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
 
             com.example.data.sync.DriveSyncResult.Restored(
                 newCount = importResult.newCount,
@@ -523,7 +533,7 @@ class NoteRepository(
         } else {
             noteDao.insertNote(note.copy(hash = hash))
         }
-        com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
     }
 
     suspend fun ensureNoteContentLoaded(note: NoteEntity): NoteEntity = withContext(Dispatchers.IO) {
@@ -647,7 +657,7 @@ class NoteRepository(
             removeDuplicateNotes()
 
             updateSettings { it.copy(lastSyncTime = System.currentTimeMillis()) }
-            com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
 
             FolderSyncResult(
                 scanned = discovered.size,
@@ -741,7 +751,7 @@ class NoteRepository(
             removeDuplicateNotes()
 
             updateSettings { it.copy(lastSyncTime = System.currentTimeMillis()) }
-            com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
 
             FolderSyncResult(
                 scanned = discovered.size,
@@ -804,7 +814,7 @@ class NoteRepository(
             removeDuplicateNotes()
 
             updateSettings { it.copy(lastSyncTime = System.currentTimeMillis()) }
-            com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
             FolderSyncResult(scanned = scanned, newCount = neu, updatedCount = upd, dupeCount = dupe)
         } catch (e: Exception) {
             FolderSyncResult(error = e.localizedMessage ?: "Sync error")
@@ -871,7 +881,7 @@ class NoteRepository(
 
         if (toDeleteIds.isNotEmpty()) {
             noteDao.deleteNotesByIds(toDeleteIds.toList())
-            com.example.widget.GlassNotesWidgetReceiver.updateAllWidgets(context)
+
         }
         toDeleteIds.size
     }

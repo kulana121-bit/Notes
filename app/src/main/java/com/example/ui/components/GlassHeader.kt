@@ -73,7 +73,7 @@ fun ReaderModeSwitch(
     val colors = GlassTheme.colors
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(colors.field)
             .padding(3.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -88,7 +88,7 @@ fun ReaderModeSwitch(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(9.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(if (isSelected) colors.chipOnBg else Color.Transparent)
                     .telegramBounceClickable { onReaderModeChange(mode) }
                     .padding(vertical = 6.dp),
@@ -297,7 +297,7 @@ fun GlassHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .border(
                         1.dp,
@@ -307,7 +307,7 @@ fun GlassHeader(
                                 Color(0xFFA855F7).copy(alpha = sparkleGlow)
                             )
                         ) else SolidColor(colors.glassBorder),
-                        RoundedCornerShape(14.dp)
+                        RoundedCornerShape(24.dp)
                     )
                     .padding(start = 12.dp, end = 6.dp),
                 contentAlignment = Alignment.CenterStart
@@ -367,7 +367,7 @@ fun GlassHeader(
                     // Gemini AI Sparkle Button in Search Bar
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(
                                 Brush.linearGradient(
                                     listOf(
@@ -454,54 +454,16 @@ fun GlassHeader(
                     }
                 }
 
-                if (readerMode == "pdf") {
-                    FilterChipItem(
-                        label = "All PDFs",
-                        isSelected = selectedFilter == "all",
-                        onClick = { onFilterChange("all") }
-                    )
-                    FilterChipItem(
-                        label = "Pinned",
-                        isSelected = selectedFilter == "pinned",
-                        onClick = { onFilterChange("pinned") }
-                    )
-                    FilterChipItem(
-                        label = "Recent",
-                        isSelected = selectedFilter == "recent",
-                        onClick = { onFilterChange("recent") }
-                    )
-                    FilterChipItem(
-                        label = "Imported",
-                        isSelected = selectedFilter == "imported",
-                        onClick = { onFilterChange("imported") }
-                    )
-                    FilterChipItem(
-                        label = "Documents",
-                        isSelected = selectedFilter == "docs",
-                        onClick = { onFilterChange("docs") }
-                    )
-                } else {
-                    FilterChipItem(
-                        label = "All",
-                        isSelected = selectedFilter == "all",
-                        onClick = { onFilterChange("all") }
-                    )
-                    FilterChipItem(
-                        label = "Text",
-                        isSelected = selectedFilter == "text",
-                        onClick = { onFilterChange("text") }
-                    )
-                    FilterChipItem(
-                        label = "HTML",
-                        isSelected = selectedFilter == "html",
-                        onClick = { onFilterChange("html") }
-                    )
-                    FilterChipItem(
-                        label = "Pinned",
-                        isSelected = selectedFilter == "pinned",
-                        onClick = { onFilterChange("pinned") }
-                    )
-                }
+                FilterChipItem(
+                    label = "All",
+                    isSelected = selectedFilter == "all",
+                    onClick = { onFilterChange("all") }
+                )
+                FilterChipItem(
+                    label = "Pinned",
+                    isSelected = selectedFilter == "pinned",
+                    onClick = { onFilterChange("pinned") }
+                )
 
                 categories.forEach { cat ->
                     FilterChipItem(

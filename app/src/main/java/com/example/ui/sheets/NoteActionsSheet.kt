@@ -104,13 +104,6 @@ fun NoteActionsSheet(
             )
 
             ActionRowItem(
-                icon = Icons.Default.Fullscreen,
-                label = "Full screen reading",
-                sub = "Only the note — no bars, no title",
-                onClick = { onDismiss(); onZenReading() }
-            )
-
-            ActionRowItem(
                 icon = Icons.Default.Label,
                 label = "Set Category / Tag",
                 sub = if (note.category.isNullOrBlank()) "No category set" else "Current: ${note.category}",
@@ -142,12 +135,6 @@ fun NoteActionsSheet(
                 label = "Copy text",
                 sub = "Whole note to the clipboard",
                 onClick = { onDismiss(); onCopyText() }
-            )
-
-            ActionRowItem(
-                icon = Icons.Default.FileCopy,
-                label = "Duplicate",
-                onClick = { onDismiss(); onDuplicate() }
             )
 
             ActionRowItem(
@@ -224,7 +211,7 @@ fun SetCategorySheet(
                 onValueChange = { categoryInputState.value = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .padding(16.dp),
                 textStyle = androidx.compose.ui.text.TextStyle(
@@ -257,7 +244,7 @@ fun SetCategorySheet(
                     existingCategories.forEach { cat ->
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(colors.field)
                                 .clickable { categoryInputState.value = cat }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
@@ -277,7 +264,7 @@ fun SetCategorySheet(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .clickable { onSaveCategory(null) }
                         .padding(vertical = 14.dp),
@@ -289,7 +276,7 @@ fun SetCategorySheet(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.accent)
                         .clickable { onSaveCategory(categoryInputState.value.trim().takeIf { it.isNotBlank() }) }
                         .padding(vertical = 14.dp),
@@ -322,7 +309,7 @@ private fun ActionRowItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -334,7 +321,7 @@ private fun ActionRowItem(
         Box(
             modifier = Modifier
                 .size(38.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(colors.field),
             contentAlignment = Alignment.Center
         ) {

@@ -68,7 +68,7 @@ class GoogleAuthManager(private val context: Context) {
         const val SCOPE_EMAIL = "https://www.googleapis.com/auth/userinfo.email"
         const val SCOPE_PROFILE = "https://www.googleapis.com/auth/userinfo.profile"
 
-        private const val OAUTH_SCOPE_STRING = "oauth2:$SCOPE_DRIVE_APPDATA $SCOPE_DRIVE_FILE $SCOPE_EMAIL $SCOPE_PROFILE"
+        private const val OAUTH_SCOPE_STRING = "oauth2:email profile openid"
     }
 
     private val authScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)

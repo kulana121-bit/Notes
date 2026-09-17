@@ -51,10 +51,10 @@ fun NoteGridItem(
 
     Box(
         modifier = modifier
-            .shadow(if (colors.isDark || colors.isReduced) 0.dp else 2.dp, RoundedCornerShape(18.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
-            .clip(RoundedCornerShape(18.dp))
+            .shadow(if (colors.isDark || colors.isReduced) 0.dp else 2.dp, RoundedCornerShape(32.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
+            .clip(RoundedCornerShape(32.dp))
             .background(colors.card)
-            .border(1.dp, colors.hairline, RoundedCornerShape(18.dp))
+            .border(1.dp, colors.hairline, RoundedCornerShape(32.dp))
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = ripple(bounded = true),
@@ -79,7 +79,7 @@ fun NoteGridItem(
                     Spacer(modifier = Modifier.width(6.dp))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(Color(0xFFDC2626))
                             .padding(horizontal = 5.dp, vertical = 1.dp)
                     ) {
@@ -94,7 +94,7 @@ fun NoteGridItem(
                     Spacer(modifier = Modifier.width(6.dp))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(colors.chipOnBg)
                             .padding(horizontal = 5.dp, vertical = 1.dp)
                     ) {

@@ -58,9 +58,9 @@ fun GlassDock(
             .widthIn(max = if (isLandscape) 420.dp else 500.dp)
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .shadow(if (colors.isReduced) 0.dp else 16.dp, RoundedCornerShape(24.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
-            .background(colors.glass, RoundedCornerShape(24.dp))
-            .border(1.dp, colors.glassBorder, RoundedCornerShape(24.dp))
+            .shadow(if (colors.isReduced) 0.dp else 16.dp, RoundedCornerShape(32.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
+            .background(colors.glass, RoundedCornerShape(32.dp))
+            .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
             .height(dockHeight)
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center
@@ -126,7 +126,7 @@ private fun DockIconButton(
     Box(
         modifier = Modifier
             .width(64.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),

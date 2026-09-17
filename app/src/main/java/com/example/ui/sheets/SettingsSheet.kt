@@ -154,9 +154,9 @@ fun SettingsSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(32.dp))
                     .background(colors.field)
-                    .border(1.dp, colors.hairline, RoundedCornerShape(18.dp))
+                    .border(1.dp, colors.hairline, RoundedCornerShape(32.dp))
                     .padding(14.dp)
             ) {
                 Row(
@@ -167,8 +167,8 @@ fun SettingsSheet(
                     Box(
                         modifier = Modifier
                             .size(52.dp)
-                            .shadow(8.dp, RoundedCornerShape(13.dp), spotColor = activeIconItem.primaryColor.copy(alpha = 0.5f))
-                            .clip(RoundedCornerShape(13.dp))
+                            .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = activeIconItem.primaryColor.copy(alpha = 0.5f))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(activeIconItem.primaryColor, activeIconItem.secondaryColor)
@@ -199,7 +199,7 @@ fun SettingsSheet(
                             )
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
+                                    .clip(RoundedCornerShape(24.dp))
                                     .background(colors.chipOnBg)
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
@@ -277,7 +277,7 @@ fun SettingsSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable {
                         VibrationHelper.click(localContext)
                         appNameDraft = settings.customAppName
@@ -303,7 +303,7 @@ fun SettingsSheet(
                 }
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
@@ -358,7 +358,7 @@ fun SettingsSheet(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .clickable {
                                     VibrationHelper.click(localContext)
                                     onSetAccentPalette(key)
@@ -449,7 +449,7 @@ fun SettingsSheet(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .clickable {
                                     VibrationHelper.click(localContext)
                                     onSetAppIconPreset(iconItem.key)
@@ -461,10 +461,10 @@ fun SettingsSheet(
                                     .size(56.dp)
                                     .shadow(
                                         elevation = if (isSelected) 10.dp else 2.dp,
-                                        shape = RoundedCornerShape(15.dp),
+                                        shape = RoundedCornerShape(24.dp),
                                         spotColor = iconItem.primaryColor.copy(alpha = 0.6f)
                                     )
-                                    .clip(RoundedCornerShape(15.dp))
+                                    .clip(RoundedCornerShape(24.dp))
                                     .background(
                                         Brush.linearGradient(
                                             listOf(iconItem.primaryColor, iconItem.secondaryColor)
@@ -473,7 +473,7 @@ fun SettingsSheet(
                                     .border(
                                         width = if (isSelected) 3.5.dp else 1.dp,
                                         color = if (isSelected) (if (colors.isDark) Color.White else Color(0xFF1E1E24)) else colors.hairline,
-                                        shape = RoundedCornerShape(15.dp)
+                                        shape = RoundedCornerShape(24.dp)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -542,7 +542,7 @@ fun SettingsSheet(
 
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -562,7 +562,7 @@ fun SettingsSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable {
                         VibrationHelper.click(localContext)
                         showResetCustomizationDialog = true
@@ -611,7 +611,7 @@ fun SettingsSheet(
                 // Theme Segment
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -621,75 +621,7 @@ fun SettingsSheet(
                 }
             }
 
-            // Reduce transparency (Performance mode)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsIcon(icon = Icons.Default.Speed)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Reduce transparency",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.text
-                    )
-                    Text(
-                        text = "Solid cards for maximum performance on low-end phones",
-                        fontSize = 12.5.sp,
-                        color = colors.textSecondary
-                    )
-                }
-                Switch(
-                    checked = settings.reduceTransparency,
-                    onCheckedChange = onSetReduceTransparency,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color(0xFF34C759)
-                    )
-                )
-            }
-
-            // Realistic Haptic Feedback
             val localContext = androidx.compose.ui.platform.LocalContext.current
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsIcon(icon = Icons.Default.Vibration)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Realistic Haptic Feedback",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.text
-                    )
-                    Text(
-                        text = "Tactile vibration responses on taps, gestures, and actions",
-                        fontSize = 12.5.sp,
-                        color = colors.textSecondary
-                    )
-                }
-                Switch(
-                    checked = settings.hapticsEnabled,
-                    onCheckedChange = { isEnabled ->
-                        onSetHapticsEnabled(isEnabled)
-                        if (isEnabled) {
-                            VibrationHelper.click(localContext)
-                        }
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color(0xFF34C759)
-                    )
-                )
-            }
 
             // Reading font size
             Row(
@@ -709,7 +641,7 @@ fun SettingsSheet(
                 )
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(2.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -718,7 +650,7 @@ fun SettingsSheet(
                         modifier = Modifier
                             .width(34.dp)
                             .height(32.dp)
-                            .clip(RoundedCornerShape(9.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .clickable { onSetReadingFontSize(settings.readingFontSize - 1) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -735,7 +667,7 @@ fun SettingsSheet(
                         modifier = Modifier
                             .width(34.dp)
                             .height(32.dp)
-                            .clip(RoundedCornerShape(9.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .clickable { onSetReadingFontSize(settings.readingFontSize + 1) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -771,7 +703,7 @@ fun SettingsSheet(
                 }
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -804,7 +736,7 @@ fun SettingsSheet(
                 }
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -823,7 +755,7 @@ fun SettingsSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .clickable {
                         apiKeyDraft = settings.geminiApiKey
                         showApiKeyDialog = true
@@ -846,7 +778,7 @@ fun SettingsSheet(
                         )
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(if (isKeyConnected) Color(0xFF10B981).copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f))
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
@@ -1000,9 +932,9 @@ fun SettingsSheet(
                                 listOf("HTML Notes", "Glass Vault", "Zen Notes", "Code Diary", "Pocket Notes").forEach { suggestion ->
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
+                                            .clip(RoundedCornerShape(24.dp))
                                             .background(colors.field)
-                                            .border(1.dp, colors.hairline, RoundedCornerShape(8.dp))
+                                            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
                                             .clickable {
                                                 appNameDraft = suggestion
                                             }
@@ -1164,7 +1096,7 @@ fun SettingsSheet(
                 Box(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.danger.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1186,7 +1118,7 @@ fun SettingsSheet(
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(11.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(colors.field)
                         .clickable {
                             if (!deleteArmed) {
@@ -1214,7 +1146,7 @@ fun SettingsSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .background(colors.field)
                     .clickable { onDismiss() }
                     .padding(14.dp),
@@ -1252,7 +1184,7 @@ private fun SettingsIcon(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(32.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(colors.field),
         contentAlignment = Alignment.Center
     ) {
@@ -1284,7 +1216,7 @@ private fun ThemeSegmentButton(
                 val sz = coords.size
                 buttonCenter = Offset(rootPos.x + sz.width / 2f, rootPos.y + sz.height / 2f)
             }
-            .clip(RoundedCornerShape(9.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(if (isSelected) colors.card else Color.Transparent)
             .clickable {
                 VibrationHelper.click(context)
@@ -1317,7 +1249,7 @@ private fun SettingsActionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),

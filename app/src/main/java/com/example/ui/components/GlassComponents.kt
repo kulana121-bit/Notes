@@ -52,7 +52,7 @@ import com.example.util.VibrationHelper
 @Composable
 fun GlassBox(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
+    shape: Shape = RoundedCornerShape(32.dp),
     elevation: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {

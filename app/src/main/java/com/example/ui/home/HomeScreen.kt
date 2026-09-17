@@ -428,7 +428,7 @@ fun HomeScreen(
                     scaleY = homeScale
                     alpha = homeAlpha
                     if (isHomePushed) {
-                        shape = RoundedCornerShape(26.dp)
+                        shape = RoundedCornerShape(32.dp)
                         clip = true
                     }
                 }
@@ -438,15 +438,15 @@ fun HomeScreen(
             val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             val navBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            val topBarPadding = if (isLandscape) statusBarHeight + 115.dp else statusBarHeight + 212.dp
-            val bottomBarPadding = if (isLandscape) navBarHeight + 68.dp else navBarHeight + 96.dp
+            val topBarPadding = if (isLandscape) statusBarHeight + 115.dp else statusBarHeight + 180.dp
+            val bottomBarPadding = if (isLandscape) navBarHeight + 50.dp else navBarHeight + 96.dp
 
             if (groupedNotes.isEmpty()) {
                 // Empty state
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = if (isLandscape) statusBarHeight + 120.dp else statusBarHeight + 220.dp, start = 24.dp, end = 24.dp),
+                        .padding(top = if (isLandscape) statusBarHeight + 120.dp else statusBarHeight + 200.dp, start = 24.dp, end = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
@@ -1105,9 +1105,9 @@ private fun TrashFolderBanner(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(colors.card)
-            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.35f), RoundedCornerShape(24.dp))
             .padding(14.dp)
     ) {
         Row(
@@ -1152,7 +1152,7 @@ private fun TrashFolderBanner(
                 if (trashCount > 0) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(Color(0xFF10B981).copy(alpha = 0.15f))
                             .clickable(onClick = onRestoreAll)
                             .padding(horizontal = 10.dp, vertical = 7.dp)
@@ -1178,7 +1178,7 @@ private fun TrashFolderBanner(
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(24.dp))
                             .background(Color(0xFFEF4444).copy(alpha = 0.15f))
                             .clickable(onClick = onEmptyTrash)
                             .padding(horizontal = 10.dp, vertical = 7.dp)
