@@ -62,6 +62,9 @@ interface NoteDao {
     @Update
     suspend fun updateNote(note: NoteEntity)
 
+    @Update
+    suspend fun updateNotes(notes: List<NoteEntity>)
+
     @Query("UPDATE notes SET isDeleted = 1, deletedAt = :deletedAt, pinned = 0 WHERE id = :id")
     suspend fun moveToTrash(id: String, deletedAt: Long)
 
