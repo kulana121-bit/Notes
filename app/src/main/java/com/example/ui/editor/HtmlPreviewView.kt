@@ -26,7 +26,7 @@ import com.example.ui.theme.GlassTheme
 fun HtmlPreviewView(
     htmlContent: String,
     fontSize: Int = 16,
-    isJsEnabled: Boolean = true,
+    isJsEnabled: Boolean = false,
     isZenMode: Boolean = false,
     reloadTrigger: Long = 0L,
     modifier: Modifier = Modifier
@@ -73,9 +73,9 @@ fun HtmlPreviewView(
                         displayZoomControls = false
                         textZoom = ((fontSize / 16f) * 100).toInt().coerceIn(60, 200)
                         defaultTextEncodingName = "utf-8"
-                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                        allowFileAccess = true
-                        allowContentAccess = true
+                        mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+                        allowFileAccess = false
+                        allowContentAccess = false
                     }
 
                     webViewClient = object : WebViewClient() {
