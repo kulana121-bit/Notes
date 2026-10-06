@@ -29,3 +29,4 @@ data class AppSettings(
     val appIconPreset: String = "default",
     val fontFamilyStyle: String = "sans"
 )
+

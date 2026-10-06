@@ -58,9 +58,9 @@ fun GlassDock(
             .widthIn(max = if (isLandscape) 420.dp else 500.dp)
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .shadow(if (colors.isReduced) 0.dp else 16.dp, RoundedCornerShape(32.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
-            .background(colors.glass, RoundedCornerShape(32.dp))
-            .border(1.dp, colors.glassBorder, RoundedCornerShape(32.dp))
+            .shadow(if (colors.isReduced) 0.dp else 16.dp, RoundedCornerShape(24.dp), ambientColor = colors.shadow, spotColor = colors.shadow)
+            .background(colors.glass, RoundedCornerShape(24.dp))
+            .border(1.dp, colors.glassBorder, RoundedCornerShape(24.dp))
             .height(dockHeight)
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center
@@ -78,13 +78,12 @@ fun GlassDock(
                 onClick = onSyncClick
             )
 
-            // Central Plus Button adapted to current accent palette
+            // Central Amber Plus Button
             val newInteraction = remember { MutableInteractionSource() }
-            val plusIconTint = if (colors.isDark) Color(0xFF141416) else Color.White
             Box(
                 modifier = Modifier
                     .size(buttonSize)
-                    .shadow(12.dp, CircleShape, spotColor = colors.accentSecondary.copy(alpha = 0.5f), ambientColor = colors.accentSecondary.copy(alpha = 0.3f))
+                    .shadow(12.dp, CircleShape, spotColor = Color(0x66BE8C00))
                     .clip(CircleShape)
                     .background(colors.accentSecondary)
                     .clickable(
@@ -97,7 +96,7 @@ fun GlassDock(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Create note",
-                    tint = plusIconTint,
+                    tint = Color(0xFF231A00),
                     modifier = Modifier.size(iconSize)
                 )
             }
@@ -126,7 +125,7 @@ private fun DockIconButton(
     Box(
         modifier = Modifier
             .width(64.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),

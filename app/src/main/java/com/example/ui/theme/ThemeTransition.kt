@@ -1,7 +1,5 @@
 package com.example.ui.theme
 
-import android.graphics.Bitmap
-import android.view.View
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
@@ -12,27 +10,21 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isSpecified
-import androidx.compose.ui.graphics.ClipOp
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.hypot
 
 /**
- * Controller managing Telegram-style circular reveal theme transition.
- * It snapshots the current UI before switching themes, then expands a circular cutout
- * from the switch button position to smoothly reveal the new theme underneath at 60/120fps.
+ * Controller to manage fast, high-performance radial light and dark wave transitions
+ * bursting from the theme switch button.
  */
 class ThemeTransitionState {
     var buttonOrigin by mutableStateOf(Offset.Unspecified)
@@ -40,60 +32,28 @@ class ThemeTransitionState {
     var progress by mutableFloatStateOf(0f)
     var isTargetDark by mutableStateOf(false)
 
-    var snapshotBitmap by mutableStateOf<Bitmap?>(null)
-    var fallbackOldBg by mutableStateOf(Color.Transparent)
-
-    private var animationJob: Job? = null
-
     fun recordOrigin(offset: Offset) {
         buttonOrigin = offset
     }
 
-    /**
-     * Snapshots the screen right as the user taps the toggle button
-     * before the theme state recomposes.
-     */
-    fun prepareTransition(origin: Offset, view: View?, oldBg: Color) {
-        buttonOrigin = origin
-        fallbackOldBg = oldBg
-        if (view != null && view.width > 0 && view.height > 0) {
-            try {
-                val oldBmp = snapshotBitmap
-                val newBmp = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-                val canvas = android.graphics.Canvas(newBmp)
-                view.draw(canvas)
-                snapshotBitmap = newBmp
-                oldBmp?.recycle()
-            } catch (_: Throwable) {
-                // Fallback gracefully to old background color
-            }
+    fun startTransition(toDark: Boolean, origin: Offset? = null, scope: CoroutineScope) {
+        if (origin != null && origin.isSpecified) {
+            buttonOrigin = origin
         }
-    }
-
-    /**
-     * Executes the circular reveal animation with snappy Telegram-style deceleration.
-     */
-    fun startTransition(toDark: Boolean, scope: CoroutineScope) {
         isTargetDark = toDark
         isTransitioning = true
-        animationJob?.cancel()
-        animationJob = scope.launch {
+        scope.launch {
             val anim = Animatable(0f)
-            // Telegram circular reveal curve: fast explosion out, gentle deceleration to edge
+            // Ultra-responsive, fluid 360ms fast-out cubic bezier for zero-lag 120fps feel
             anim.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 400,
-                    easing = CubicBezierEasing(0.0f, 0.0f, 0.2f, 1.0f)
+                    durationMillis = 360,
+                    easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
                 )
             ) {
                 progress = value
             }
-
-            // Cleanup snapshot upon full reveal
-            val bmp = snapshotBitmap
-            snapshotBitmap = null
-            bmp?.recycle()
             isTransitioning = false
             progress = 0f
         }
@@ -102,11 +62,6 @@ class ThemeTransitionState {
 
 val LocalThemeTransition = compositionLocalOf { ThemeTransitionState() }
 
-/**
- * Overlay that renders the Telegram-style circular reveal.
- * The previous theme snapshot is drawn with a circular cutout (ClipOp.Difference)
- * centered at the theme toggle button, expanding until the entire new screen is revealed.
- */
 @Composable
 fun ThemeLightWaveOverlay(
     state: ThemeTransitionState,
@@ -116,59 +71,86 @@ fun ThemeLightWaveOverlay(
 
     val progress = state.progress
     val isToDark = state.isTargetDark
-    val bitmap = state.snapshotBitmap
-    val fallbackBg = state.fallbackOldBg
-    val circlePath = remember { Path() }
+    val origin = if (state.buttonOrigin.isSpecified) state.buttonOrigin else Offset(800f, 150f)
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
-        val origin = if (state.buttonOrigin.isSpecified) state.buttonOrigin else Offset(w - 120f, 140f)
         val ox = origin.x.coerceIn(0f, w)
         val oy = origin.y.coerceIn(0f, h)
         val center = Offset(ox, oy)
 
-        // Diagonal distance to the farthest corner
+        // Calculate maximum corner distance
         val d1 = hypot(ox, oy)
         val d2 = hypot(w - ox, oy)
         val d3 = hypot(ox, h - oy)
         val d4 = hypot(w - ox, h - oy)
-        val maxRadius = maxOf(d1, d2, d3, d4) * 1.05f
+        val maxRadius = maxOf(d1, d2, d3, d4) * 1.15f
 
         val currentRadius = progress * maxRadius
+        // Wave alpha fades out smoothly towards the end of expansion
+        val waveAlpha = if (progress < 0.6f) 1f else ((1f - progress) / 0.4f).coerceIn(0f, 1f)
 
-        circlePath.reset()
-        circlePath.addOval(
-            Rect(
+        if (!isToDark) {
+            // === LIGHT MODE: LUMINOUS SUNLIGHT BURST ===
+            // Expanding radiant daylight wave with bright golden-white photonic glow
+            val lightBrush = Brush.radialGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.96f * waveAlpha),
+                    Color(0xFFFFFBEB).copy(alpha = 0.85f * waveAlpha),
+                    Color(0xFFFDE68A).copy(alpha = 0.50f * waveAlpha),
+                    Color.Transparent
+                ),
                 center = center,
-                radius = currentRadius
+                radius = currentRadius.coerceAtLeast(10f)
             )
-        )
 
-        // ClipOp.Difference draws the previous screen everywhere EXCEPT inside the expanding circle.
-        // The newly rendered theme underneath is thus revealed inside the circle.
-        clipPath(path = circlePath, clipOp = ClipOp.Difference) {
-            if (bitmap != null && !bitmap.isRecycled) {
-                drawImage(bitmap.asImageBitmap())
-            } else {
-                val defaultBg = if (isToDark) LightGlassColors.bg else DarkGlassColors.bg
-                drawRect(color = if (fallbackBg != Color.Transparent) fallbackBg else defaultBg)
-            }
-        }
-
-        // Clean, subtle edge rim for depth during expansion (matches Telegram)
-        if (currentRadius > 8f && currentRadius < maxRadius) {
-            val strokeColor = if (isToDark) {
-                Color.Black.copy(alpha = (0.25f * (1f - progress)).coerceIn(0f, 0.25f))
-            } else {
-                Color.White.copy(alpha = (0.35f * (1f - progress)).coerceIn(0f, 0.35f))
-            }
             drawCircle(
-                color = strokeColor,
-                radius = currentRadius,
+                brush = lightBrush,
+                radius = currentRadius.coerceAtLeast(10f),
                 center = center,
-                style = Stroke(width = 2.5f)
+                style = Fill
             )
+
+            // Bright wavefront shockwave ring
+            if (currentRadius > 15f) {
+                drawCircle(
+                    color = Color(0xFFFEF08A).copy(alpha = 0.75f * waveAlpha),
+                    radius = currentRadius,
+                    center = center,
+                    style = Stroke(width = 8f * (1f - progress * 0.5f))
+                )
+            }
+        } else {
+            // === DARK MODE: VELVET MIDNIGHT WAVE ===
+            // Expanding deep obsidian nebula wave with celestial indigo rim
+            val darkBrush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFF030712).copy(alpha = 0.96f * waveAlpha),
+                    Color(0xFF0F172A).copy(alpha = 0.85f * waveAlpha),
+                    Color(0xFF1E1B4B).copy(alpha = 0.45f * waveAlpha),
+                    Color.Transparent
+                ),
+                center = center,
+                radius = currentRadius.coerceAtLeast(10f)
+            )
+
+            drawCircle(
+                brush = darkBrush,
+                radius = currentRadius.coerceAtLeast(10f),
+                center = center,
+                style = Fill
+            )
+
+            // Electric indigo/cyan wavefront ring
+            if (currentRadius > 15f) {
+                drawCircle(
+                    color = Color(0xFF6366F1).copy(alpha = 0.70f * waveAlpha),
+                    radius = currentRadius,
+                    center = center,
+                    style = Stroke(width = 8f * (1f - progress * 0.5f))
+                )
+            }
         }
     }
 }

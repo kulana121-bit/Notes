@@ -104,7 +104,6 @@ fun GeminiSearchSheet(
     aiHistory: List<AiHistoryItem>,
     currentReaderMode: String = "html",
     geminiApiKey: String = "",
-    appName: String = "HTML Notes",
     onSetGeminiApiKey: (String) -> Unit = {},
     onDismiss: () -> Unit,
     onQuery: (String, GeminiSearchMode) -> Unit,
@@ -173,7 +172,7 @@ fun GeminiSearchSheet(
                     .padding(vertical = 10.dp)
                     .width(42.dp)
                     .height(4.5.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(3.dp))
                     .background(colors.hairline)
             )
         }
@@ -230,12 +229,12 @@ fun GeminiSearchSheet(
                             )
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(24.dp))
+                                    .clip(RoundedCornerShape(6.dp))
                                     .background(if (currentReaderMode == "pdf") Color(0xFFEF4444).copy(alpha = 0.15f) else Color(0xFF3B82F6).copy(alpha = 0.15f))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    text = if (currentReaderMode == "pdf") "PDF Drive" else appName,
+                                    text = if (currentReaderMode == "pdf") "PDF Drive" else "HTML Notes",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (currentReaderMode == "pdf") Color(0xFFEF4444) else Color(0xFF3B82F6)
@@ -257,14 +256,14 @@ fun GeminiSearchSheet(
                 ) {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(32.dp))
+                            .clip(RoundedCornerShape(20.dp))
                             .background(colors.field)
                             .padding(3.dp),
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(if (activeAiTab == "ask") colors.card else Color.Transparent)
                             .clickable {
                                 VibrationHelper.vibrate(context, 6)
@@ -283,7 +282,7 @@ fun GeminiSearchSheet(
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(if (activeAiTab == "history") colors.card else Color.Transparent)
                             .clickable {
                                 VibrationHelper.vibrate(context, 6)
@@ -443,7 +442,6 @@ fun GeminiSearchSheet(
                     AiHistoryView(
                         historyList = aiHistory,
                         currentModeType = currentReaderMode,
-                        appName = appName,
                         onClearAll = onClearHistory,
                         onDeleteItem = onDeleteHistoryItem,
                         onSelectHistory = { item ->
@@ -644,14 +642,14 @@ private fun AiPromptAndResultView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(colors.field)
                 .border(
                     width = 1.dp,
                     color = if (geminiState is GeminiQueryState.Loading) {
                         Color(0xFF8AB4F8).copy(alpha = glowAlpha)
                     } else colors.hairline,
-                    shape = RoundedCornerShape(24.dp)
+                    shape = RoundedCornerShape(16.dp)
                 )
                 .padding(14.dp)
         ) {
@@ -712,7 +710,7 @@ private fun AiPromptAndResultView(
                     // Send Button
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (currentPrompt.isNotBlank() && geminiState !is GeminiQueryState.Loading) {
                                     Brush.horizontalGradient(
@@ -798,14 +796,14 @@ private fun PresetChip(
     val colors = GlassTheme.colors
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(32.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 if (isSelected) Color(0xFF3B82F6).copy(alpha = 0.18f) else colors.field
             )
             .border(
                 width = 1.dp,
                 color = if (isSelected) Color(0xFF3B82F6) else colors.hairline,
-                shape = RoundedCornerShape(32.dp)
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp)
@@ -850,9 +848,9 @@ private fun AiLoadingCard(prompt: String, glowAlpha: Float) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(colors.card)
-            .border(1.dp, Color(0xFF8AB4F8).copy(alpha = glowAlpha), RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFF8AB4F8).copy(alpha = glowAlpha), RoundedCornerShape(16.dp))
             .padding(20.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -901,9 +899,9 @@ private fun AiSuccessCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(colors.card)
-            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
+            .border(1.dp, colors.hairline, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         // Result Header
@@ -935,7 +933,7 @@ private fun AiSuccessCard(
                     if (!result.modelUsed.isNullOrBlank()) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(6.dp))
                                 .background(colors.field)
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
@@ -954,13 +952,13 @@ private fun AiSuccessCard(
             if (isHtml) {
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(if (previewMode == "preview") colors.card else Color.Transparent)
                             .clickable { onPreviewModeChange("preview") }
                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -974,7 +972,7 @@ private fun AiSuccessCard(
                     }
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(if (previewMode == "code") colors.card else Color.Transparent)
                             .clickable { onPreviewModeChange("code") }
                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -996,9 +994,9 @@ private fun AiSuccessCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color(0xFFF59E0B).copy(alpha = 0.14f))
-                    .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.35f), RoundedCornerShape(24.dp))
+                    .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.35f), RoundedCornerShape(10.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1026,8 +1024,8 @@ private fun AiSuccessCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(340.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.dp, colors.hairline, RoundedCornerShape(10.dp))
             ) {
                 HtmlPreviewView(
                     htmlContent = result.content,
@@ -1040,7 +1038,7 @@ private fun AiSuccessCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .background(colors.field)
                     .padding(12.dp)
             ) {
@@ -1075,9 +1073,9 @@ private fun AiSuccessCard(
                     if (matching != null) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(colors.field)
-                                .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
+                                .border(1.dp, colors.hairline, RoundedCornerShape(8.dp))
                                 .clickable { onOpenCitedNote(matching.id) }
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
@@ -1114,7 +1112,7 @@ private fun AiSuccessCard(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(Brush.horizontalGradient(listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))))
                     .clickable {
                         onSaveAsNote(result, if (isHtml) "html" else "text")
@@ -1143,9 +1141,9 @@ private fun AiSuccessCard(
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(colors.field)
-                    .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
+                    .border(1.dp, colors.hairline, RoundedCornerShape(12.dp))
                     .clickable { onCopyText(result.content) }
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 contentAlignment = Alignment.Center
@@ -1182,9 +1180,9 @@ private fun AiErrorCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFFEF4444).copy(alpha = 0.1f))
-            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1214,7 +1212,7 @@ private fun AiErrorCard(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFFEF4444).copy(alpha = 0.2f))
                         .clickable(onClick = onRetry)
                         .padding(horizontal = 12.dp, vertical = 7.dp)
@@ -1228,7 +1226,7 @@ private fun AiErrorCard(
                 }
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFF3B82F6).copy(alpha = 0.2f))
                         .clickable(onClick = onConfigureApiKey)
                         .padding(horizontal = 12.dp, vertical = 7.dp)
@@ -1288,7 +1286,6 @@ private fun AiIdleState(currentReaderMode: String) {
 private fun AiHistoryView(
     historyList: List<AiHistoryItem>,
     currentModeType: String,
-    appName: String = "HTML Notes",
     onClearAll: () -> Unit,
     onDeleteItem: (String) -> Unit,
     onSelectHistory: (AiHistoryItem) -> Unit,
@@ -1313,7 +1310,7 @@ private fun AiHistoryView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${if (currentModeType == "pdf") "PDF Drive" else appName} Query History",
+                text = "${if (currentModeType == "pdf") "PDF Drive" else "HTML Notes"} Query History",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = colors.textSecondary
@@ -1322,7 +1319,7 @@ private fun AiHistoryView(
             if (historyList.isNotEmpty()) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable(onClick = onClearAll)
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
@@ -1405,9 +1402,9 @@ private fun AiHistoryCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(colors.card)
-            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
+            .border(1.dp, colors.hairline, RoundedCornerShape(14.dp))
             .padding(14.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1422,7 +1419,7 @@ private fun AiHistoryCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(Color(0xFF3B82F6).copy(alpha = 0.12f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
@@ -1502,7 +1499,7 @@ private fun AiHistoryCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(colors.field)
                             .clickable(onClick = onCopy)
                             .padding(horizontal = 8.dp, vertical = 5.dp)
@@ -1517,7 +1514,7 @@ private fun AiHistoryCard(
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(colors.field)
                             .clickable(onClick = onSaveAsNote)
                             .padding(horizontal = 8.dp, vertical = 5.dp)
@@ -1532,7 +1529,7 @@ private fun AiHistoryCard(
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFF3B82F6).copy(alpha = 0.15f))
                             .clickable(onClick = onOpen)
                             .padding(horizontal = 10.dp, vertical = 5.dp)

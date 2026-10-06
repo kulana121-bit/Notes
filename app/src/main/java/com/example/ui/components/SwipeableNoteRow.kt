@@ -108,7 +108,7 @@ fun SwipeableNoteRow(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(backgroundColor)
                     .padding(horizontal = 20.dp),
                 contentAlignment = alignment

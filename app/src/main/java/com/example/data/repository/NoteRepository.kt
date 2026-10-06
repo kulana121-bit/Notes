@@ -148,77 +148,83 @@ class NoteRepository(
             HashUtil.noteHash(note.title, note.content)
         }
         noteDao.updateNote(note.copy(hash = hash, updatedAt = System.currentTimeMillis()))
-
-    }
-
-    suspend fun moveToTrash(id: String) = withContext(Dispatchers.IO) {
-        noteDao.moveToTrash(id, System.currentTimeMillis())
-
     }
 
     suspend fun restoreFromTrash(id: String) = withContext(Dispatchers.IO) {
         noteDao.restoreFromTrash(id)
-
     }
 
     suspend fun restoreAllFromTrash() = withContext(Dispatchers.IO) {
         noteDao.restoreAllFromTrash()
-
     }
 
     suspend fun deletePhysicalSourceFile(note: NoteEntity): Boolean = withContext(Dispatchers.IO) {
-        val source = note.source ?: return@withContext false
-        if (source.isBlank()) return@withContext false
         if (!_settingsFlow.value.deleteFromStorageWhenDeleted) return@withContext false
-
+        
         var deleted = false
-        try {
-            if (source.startsWith("content://")) {
-                val uri = Uri.parse(source)
-                try {
-                    val docFile = DocumentFile.fromSingleUri(context, uri)
-                    if (docFile != null && docFile.exists()) {
-                        deleted = docFile.delete()
-                    }
-                } catch (_: Throwable) {}
+        val source = note.source
 
-                if (!deleted) {
+        // 1. Delete original source file if source path/URI exists
+        if (!source.isNullOrBlank()) {
+            try {
+                if (source.startsWith("content://")) {
+                    val uri = Uri.parse(source)
                     try {
-                        val rows = context.contentResolver.delete(uri, null, null)
-                        deleted = rows > 0
+                        val docFile = DocumentFile.fromSingleUri(context, uri)
+                        if (docFile != null && docFile.exists()) {
+                            deleted = docFile.delete()
+                        }
+                    } catch (_: Throwable) {}
+
+                    if (!deleted) {
+                        try {
+                            val rows = context.contentResolver.delete(uri, null, null)
+                            deleted = rows > 0
+                        } catch (_: Throwable) {}
+                    }
+                } else {
+                    val path = if (source.startsWith("file://")) {
+                        Uri.parse(source).path ?: source.removePrefix("file://")
+                    } else {
+                        source
+                    }
+                    val file = File(path)
+                    if (file.exists()) {
+                        deleted = file.delete() || deleted
+                    }
+                    try {
+                        context.contentResolver.delete(
+                            android.provider.MediaStore.Files.getContentUri("external"),
+                            "${android.provider.MediaStore.Files.FileColumns.DATA} = ?",
+                            arrayOf(file.absolutePath)
+                        )
                     } catch (_: Throwable) {}
                 }
-                // Fallback for MediaStore Document Tree URIs
-                if (!deleted && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    try {
-                         val rows = context.contentResolver.delete(uri, null, null)
-                         deleted = rows > 0
-                    } catch (_: SecurityException) {
-                        // Needs user permission to delete from media store on Android 10+
-                    }
-                }
-
-            } else {
-                val path = if (source.startsWith("file://")) {
-                    Uri.parse(source).path ?: source.removePrefix("file://")
-                } else {
-                    source
-                }
-                val file = File(path)
-                if (file.exists()) {
-                    deleted = file.delete()
-                }
-                try {
-                    context.contentResolver.delete(
-                        android.provider.MediaStore.Files.getContentUri("external"),
-                        "${android.provider.MediaStore.Files.FileColumns.DATA} = ?",
-                        arrayOf(file.absolutePath)
-                    )
-                } catch (_: Throwable) {}
+            } catch (e: Throwable) {
+                android.util.Log.e("NoteRepository", "Error deleting physical source file for note ${note.id}", e)
             }
-        } catch (e: Throwable) {
-            android.util.Log.e("NoteRepository", "Error deleting physical source file for note ${note.id}", e)
         }
+
+        // 2. For PDF notes whose content field contains a device storage file path
+        if (note.type == "pdf" && (note.content.startsWith("/") || note.content.startsWith("file://"))) {
+            try {
+                val directPath = note.content.removePrefix("file://")
+                val directFile = File(directPath)
+                if (directFile.exists()) {
+                    val res = directFile.delete()
+                    deleted = deleted || res
+                }
+            } catch (_: Throwable) {}
+        }
+
+        // 3. Clean up internal app cache for PDF renderings
+        try {
+            val cachedPdf = File(context.filesDir, "pdfs/${note.id}.pdf")
+            if (cachedPdf.exists()) {
+                cachedPdf.delete()
+            }
+        } catch (_: Throwable) {}
+
         deleted
     }
 
@@ -253,17 +259,22 @@ class NoteRepository(
         fileDeleted
     }
 
-    suspend fun deleteNote(id: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun moveToTrash(id: String): Boolean = withContext(Dispatchers.IO) {
         val note = noteDao.getNoteByIdDirect(id)
         var fileDeleted = false
-        // Soft delete moves to trash
-        if (note != null && !note.source.isNullOrBlank() && _settingsFlow.value.deleteFromStorageWhenDeleted) {
-            // Note is synced from device storage: notify and delete from physical system if configured
-            fileDeleted = deletePhysicalSourceFile(note)
+        if (note != null && _settingsFlow.value.deleteFromStorageWhenDeleted) {
+            val hasFile = !note.source.isNullOrBlank() || (note.type == "pdf" && (note.content.startsWith("/") || note.content.startsWith("file://")))
+            if (hasFile) {
+                fileDeleted = deletePhysicalSourceFile(note)
+            }
         }
         noteDao.moveToTrash(id, System.currentTimeMillis())
 
         fileDeleted
+    }
+
+    suspend fun deleteNote(id: String): Boolean = withContext(Dispatchers.IO) {
+        moveToTrash(id)
     }
 
     suspend fun deleteAllNotes() = withContext(Dispatchers.IO) {

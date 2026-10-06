@@ -144,9 +144,6 @@ fun HomeScreen(
     val geminiState by viewModel.geminiState.collectAsStateWithLifecycle()
     val aiHistory by viewModel.aiHistory.collectAsStateWithLifecycle()
     val trashCount by viewModel.trashCount.collectAsStateWithLifecycle()
-    val googleUser by viewModel.googleUser.collectAsStateWithLifecycle()
-    val isGoogleSyncing by viewModel.isGoogleSyncing.collectAsStateWithLifecycle()
-    val googleSyncStatus by viewModel.googleSyncStatus.collectAsStateWithLifecycle()
 
     var activeSheet by remember { mutableStateOf<ActiveSheet>(ActiveSheet.None) }
     var editingNoteId by remember { mutableStateOf<String?>(null) }
@@ -291,20 +288,6 @@ fun HomeScreen(
         }
     }
 
-    // Google Sign-In Activity Result Launcher
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        viewModel.handleGoogleSignInResult(result.data)
-    }
-
-    // Device Google Account Picker Launcher (Android OS System Account Manager)
-    val accountPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        viewModel.handleAccountPickerResult(result.data)
-    }
-
     val listState = rememberLazyListState()
     val gridState = rememberLazyGridState()
 
@@ -428,7 +411,7 @@ fun HomeScreen(
                     scaleY = homeScale
                     alpha = homeAlpha
                     if (isHomePushed) {
-                        shape = RoundedCornerShape(32.dp)
+                        shape = RoundedCornerShape(26.dp)
                         clip = true
                     }
                 }
@@ -438,15 +421,15 @@ fun HomeScreen(
             val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             val navBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            val topBarPadding = if (isLandscape) statusBarHeight + 115.dp else statusBarHeight + 180.dp
-            val bottomBarPadding = if (isLandscape) navBarHeight + 50.dp else navBarHeight + 96.dp
+            val topBarPadding = if (isLandscape) statusBarHeight + 115.dp else statusBarHeight + 212.dp
+            val bottomBarPadding = if (isLandscape) navBarHeight + 68.dp else navBarHeight + 96.dp
 
             if (groupedNotes.isEmpty()) {
                 // Empty state
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = if (isLandscape) statusBarHeight + 120.dp else statusBarHeight + 200.dp, start = 24.dp, end = 24.dp),
+                        .padding(top = if (isLandscape) statusBarHeight + 120.dp else statusBarHeight + 220.dp, start = 24.dp, end = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
@@ -696,7 +679,6 @@ fun HomeScreen(
                     VibrationHelper.vibrate(context, 10)
                     viewModel.setReaderMode(it)
                 },
-                customAppName = settings.customAppName,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
 
@@ -900,19 +882,12 @@ fun HomeScreen(
                     onSetPdfPageMode = { viewModel.setPdfPageMode(it) },
                     onSetPdfColorFilter = { viewModel.setPdfColorFilter(it) },
                     onSetPdfRenderQuality = { viewModel.setPdfRenderQuality(it) },
-                    onSetCustomAppName = { viewModel.setCustomAppName(it) },
-                    onSetAccentPalette = { viewModel.setAccentPalette(it) },
-                    onSetAppIconPreset = { viewModel.setAppIconPreset(it) },
-                    onSetFontFamilyStyle = { viewModel.setFontFamilyStyle(it) },
-                    onResetCustomization = { viewModel.resetCustomizationDefaults() },
                     onExportBackup = { handleExportBackupJson() },
                     onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("application/json", "text/*")) },
                     onRemoveDuplicates = { viewModel.removeDuplicateNotes() },
                     onWipeAllNotes = { viewModel.deleteAllNotes() },
-                    onSetGeminiApiKey = { viewModel.setGeminiApiKey(it) },
-                    onOpenSyncSheet = { activeSheet = ActiveSheet.Sync },
-                    onBackupToDrive = { viewModel.backupToGoogleDrive(silent = false) },
-                    onRestoreFromDrive = { viewModel.restoreFromGoogleDrive() }
+                    onSetDeleteFromStorageWhenDeleted = { viewModel.setDeleteFromStorageWhenDeleted(it) },
+                    onSetGeminiApiKey = { viewModel.setGeminiApiKey(it) }
                 )
             }
 
@@ -922,12 +897,6 @@ fun HomeScreen(
                     readerMode = settings.readerMode,
                     syncFolderName = settings.syncFolderName,
                     lastSyncTime = settings.lastSyncTime,
-                    googleUser = googleUser,
-                    isGoogleSyncing = isGoogleSyncing,
-                    googleSyncStatus = googleSyncStatus,
-                    lastGoogleDriveBackupTime = settings.lastGoogleDriveBackupTime,
-                    googleDriveAutoBackup = settings.googleDriveAutoBackup,
-                    deleteFromStorageWhenDeleted = settings.deleteFromStorageWhenDeleted,
                     onDismiss = { activeSheet = ActiveSheet.None },
                     onSelectFolder = { selectFolderLauncher.launch(null) },
                     onClearFolder = { viewModel.setSyncFolder(null, null) },
@@ -936,30 +905,7 @@ fun HomeScreen(
                     onSyncPdfDevice = { triggerFullDeviceSync("pdf") },
                     onImportFiles = { importFilesLauncher.launch(arrayOf("text/*", "text/html", "text/plain")) },
                     onImportPdf = { importPdfLauncher.launch("application/pdf") },
-                    onToggleAutoSync = { viewModel.setAutoSync(it) },
-                    onSignInGoogle = {
-                        try {
-                            googleSignInLauncher.launch(viewModel.getGoogleSignInIntent())
-                        } catch (e: Exception) {
-                            try {
-                                accountPickerLauncher.launch(viewModel.getSystemAccountPickerIntent())
-                            } catch (e2: Exception) {
-                                viewModel.showToast("Cannot launch Google Sign-In: ${e.localizedMessage}")
-                            }
-                        }
-                    },
-                    onChooseDeviceAccount = {
-                        try {
-                            accountPickerLauncher.launch(viewModel.getSystemAccountPickerIntent())
-                        } catch (e: Exception) {
-                            viewModel.showToast("Cannot open device account picker: ${e.localizedMessage}")
-                        }
-                    },
-                    onSignOutGoogle = { viewModel.signOutGoogle() },
-                    onBackupToDrive = { viewModel.backupToGoogleDrive(silent = false) },
-                    onRestoreFromDrive = { viewModel.restoreFromGoogleDrive() },
-                    onToggleGoogleDriveAutoBackup = { viewModel.toggleGoogleDriveAutoBackup(it) },
-                    onToggleDeleteFromStorageWhenDeleted = { viewModel.toggleDeleteFromStorageWhenDeleted(it) }
+                    onToggleAutoSync = { viewModel.setAutoSync(it) }
                 )
             }
 
@@ -980,7 +926,6 @@ fun HomeScreen(
                     aiHistory = aiHistory,
                     currentReaderMode = settings.readerMode,
                     geminiApiKey = settings.geminiApiKey,
-                    appName = settings.customAppName,
                     onSetGeminiApiKey = { viewModel.setGeminiApiKey(it) },
                     onDismiss = {
                         activeSheet = ActiveSheet.None
@@ -1105,9 +1050,9 @@ private fun TrashFolderBanner(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(colors.card)
-            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.35f), RoundedCornerShape(24.dp))
+            .border(1.dp, Color(0xFFEF4444).copy(alpha = 0.35f), RoundedCornerShape(16.dp))
             .padding(14.dp)
     ) {
         Row(
@@ -1152,7 +1097,7 @@ private fun TrashFolderBanner(
                 if (trashCount > 0) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(Color(0xFF10B981).copy(alpha = 0.15f))
                             .clickable(onClick = onRestoreAll)
                             .padding(horizontal = 10.dp, vertical = 7.dp)
@@ -1178,7 +1123,7 @@ private fun TrashFolderBanner(
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(Color(0xFFEF4444).copy(alpha = 0.15f))
                             .clickable(onClick = onEmptyTrash)
                             .padding(horizontal = 10.dp, vertical = 7.dp)

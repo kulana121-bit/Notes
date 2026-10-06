@@ -148,14 +148,6 @@ class NotesViewModel(
     private val _aiHistory = MutableStateFlow<List<AiHistoryItem>>(emptyList())
     val aiHistory = _aiHistory.asStateFlow()
 
-    // Google Auth & Drive Sync
-    val authState: StateFlow<com.example.data.sync.AuthState> = repository.googleAuthManager.authState
-    val googleUser: StateFlow<com.example.data.sync.GoogleUserProfile?> = repository.googleAuthManager.currentUser
-    private val _isGoogleSyncing = MutableStateFlow(false)
-    val isGoogleSyncing: StateFlow<Boolean> = _isGoogleSyncing.asStateFlow()
-    private val _googleSyncStatus = MutableStateFlow<String?>(null)
-    val googleSyncStatus: StateFlow<String?> = _googleSyncStatus.asStateFlow()
-
     private var clockTickerJob: Job? = null
     private var recentlyDeletedNote: NoteEntity? = null
 
@@ -279,34 +271,6 @@ class NotesViewModel(
     )
 
     init {
-        // Automatically restore previous authenticated Google session
-        viewModelScope.launch {
-            repository.googleAuthManager.restoreSession()
-        }
-
-        // Synchronize authenticated user profile with settings
-        viewModelScope.launch {
-            repository.googleAuthManager.currentUser.collect { user ->
-                if (user != null) {
-                    repository.updateSettings {
-                        it.copy(
-                            googleAccountEmail = user.email,
-                            googleAccountName = user.displayName,
-                            googleAccountPhoto = user.photoUrl
-                        )
-                    }
-                } else if (repository.googleAuthManager.authState.value is com.example.data.sync.AuthState.SignedOut) {
-                    repository.updateSettings {
-                        it.copy(
-                            googleAccountEmail = null,
-                            googleAccountName = null,
-                            googleAccountPhoto = null
-                        )
-                    }
-                }
-            }
-        }
-
         // Sync haptic settings with global vibration helper
         viewModelScope.launch {
             settings.collect { s ->
@@ -429,16 +393,9 @@ class NotesViewModel(
         val trimmed = prompt.trim()
         if (trimmed.isEmpty()) return
         val currentModeType = settings.value.readerMode
-        val appName = settings.value.customAppName
         viewModelScope.launch {
             _geminiState.value = GeminiQueryState.Loading(trimmed, mode)
-            val result = GeminiClient.queryGemini(
-                query = trimmed,
-                mode = mode,
-                allNotes = allNotes.value,
-                customKey = settings.value.geminiApiKey,
-                appName = appName
-            )
+            val result = GeminiClient.queryGemini(trimmed, mode, allNotes.value, settings.value.geminiApiKey)
             if (result.error != null && result.content.isBlank()) {
                 _geminiState.value = GeminiQueryState.Error(result.error, trimmed, mode)
             } else {
@@ -650,6 +607,7 @@ class NotesViewModel(
     fun setReduceTransparency(reduce: Boolean) {
         viewModelScope.launch {
             repository.updateSettings { it.copy(reduceTransparency = reduce) }
+            showToast(if (!reduce) "Liquid glass effect enabled" else "Solid performance mode enabled")
         }
     }
 
@@ -710,49 +668,6 @@ class NotesViewModel(
         }
     }
 
-    fun setCustomAppName(name: String) {
-        val trimmed = name.trim().ifBlank { "HTML Notes" }
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(customAppName = trimmed) }
-            showToast("App name updated to '$trimmed'")
-        }
-    }
-
-    fun setAccentPalette(palette: String) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(accentPalette = palette) }
-            showToast("Accent theme set to ${palette.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }}")
-        }
-    }
-
-    fun setAppIconPreset(preset: String) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(appIconPreset = preset) }
-            showToast("App launcher icon updated")
-        }
-    }
-
-    fun setFontFamilyStyle(style: String) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(fontFamilyStyle = style) }
-            showToast("Font style set to ${style.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }}")
-        }
-    }
-
-    fun resetCustomizationDefaults() {
-        viewModelScope.launch {
-            repository.updateSettings {
-                it.copy(
-                    customAppName = "HTML Notes",
-                    accentPalette = "gold",
-                    appIconPreset = "default",
-                    fontFamilyStyle = "sans"
-                )
-            }
-            showToast("Customization reset to default")
-        }
-    }
-
     fun setPinCode(pin: String) {
         viewModelScope.launch {
             repository.updateSettings { it.copy(pinCode = pin) }
@@ -766,6 +681,13 @@ class NotesViewModel(
             val updated = note.copy(isLocked = !note.isLocked, updatedAt = System.currentTimeMillis())
             repository.insertOrUpdate(updated)
             showToast(if (updated.isLocked) "Note locked with Biometrics" else "Note unlocked")
+        }
+    }
+
+    fun setDeleteFromStorageWhenDeleted(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.updateSettings { it.copy(deleteFromStorageWhenDeleted = enabled) }
+            showToast(if (enabled) "Also delete original files from phone storage enabled" else "Keep original files on phone storage")
         }
     }
 
@@ -899,10 +821,19 @@ class NotesViewModel(
         viewModelScope.launch {
             val note = repository.getNoteDirect(id) ?: return@launch
             recentlyDeletedNote = note
-            repository.moveToTrash(id)
+            val hasFile = !note.source.isNullOrBlank() || (note.type == "pdf" && (note.content.startsWith("/") || note.content.startsWith("file://")))
+            val fileDeleted = repository.moveToTrash(id)
+            val shouldDeleteOriginal = settings.value.deleteFromStorageWhenDeleted
+
+            val message = if (hasFile && shouldDeleteOriginal) {
+                "Note and original file deleted"
+            } else {
+                "Moved to Trash"
+            }
+
             _toastFlow.emit(
                 ToastEvent.WithAction(
-                    message = "Moved to Trash",
+                    message = message,
                     actionLabel = "Undo",
                     onAction = {
                         viewModelScope.launch {
@@ -930,9 +861,9 @@ class NotesViewModel(
 
     fun emptyTrash() {
         viewModelScope.launch {
-            val filesDeleted = repository.emptyTrash()
-            if (filesDeleted > 0) {
-                showToast("Trash emptied ($filesDeleted device files removed from system)")
+            val count = repository.emptyTrash()
+            if (count > 0) {
+                showToast("Trash emptied ($count original file${if (count == 1) "" else "s"} deleted from storage)")
             } else {
                 showToast("Trash emptied")
             }
@@ -941,12 +872,17 @@ class NotesViewModel(
 
     fun deletePermanently(id: String) {
         viewModelScope.launch {
+            val note = repository.getNoteDirect(id)
+            val hasFile = note != null && (!note.source.isNullOrBlank() || (note.type == "pdf" && (note.content.startsWith("/") || note.content.startsWith("file://"))))
             val fileDeleted = repository.deletePermanently(id)
-            if (fileDeleted) {
-                showToast("Permanently deleted (device file removed from system)")
+            val shouldDeleteOriginal = settings.value.deleteFromStorageWhenDeleted
+
+            val message = if (hasFile && shouldDeleteOriginal) {
+                "Note and original file deleted permanently"
             } else {
-                showToast("Permanently deleted")
+                "Permanently deleted"
             }
+            showToast(message)
         }
     }
 
@@ -1224,145 +1160,6 @@ class NotesViewModel(
     fun showToast(message: String) {
         viewModelScope.launch {
             _toastFlow.emit(ToastEvent.Simple(message))
-        }
-    }
-
-    // --- Google Authentication & Drive Operations ---
-    fun getGoogleSignInIntent(): android.content.Intent = repository.googleAuthManager.getSignInIntent()
-
-    fun getSystemAccountPickerIntent(): android.content.Intent =
-        repository.googleAuthManager.getSystemAccountPickerIntent(settings.value.googleAccountEmail)
-
-    fun handleGoogleSignInResult(data: android.content.Intent?) {
-        viewModelScope.launch {
-            val res = repository.googleAuthManager.handleSignInResult(data)
-            if (res.isSuccess) {
-                val user = res.getOrNull()
-                if (user != null) {
-                    repository.updateSettings {
-                        it.copy(
-                            googleAccountEmail = user.email,
-                            googleAccountName = user.displayName,
-                            googleAccountPhoto = user.photoUrl
-                        )
-                    }
-                    showToast("Signed in as ${user.displayName} (${user.email})")
-                    if (settings.value.googleDriveAutoBackup) {
-                        backupToGoogleDrive(silent = true)
-                    }
-                }
-            } else {
-                showToast("Google Sign-In failed: ${res.exceptionOrNull()?.localizedMessage ?: "Unknown error"}")
-            }
-        }
-    }
-
-    fun handleAccountPickerResult(data: android.content.Intent?) {
-        viewModelScope.launch {
-            val res = repository.googleAuthManager.handleAccountPickerResult(data)
-            if (res.isSuccess) {
-                val user = res.getOrNull()
-                if (user != null) {
-                    repository.updateSettings {
-                        it.copy(
-                            googleAccountEmail = user.email,
-                            googleAccountName = user.displayName,
-                            googleAccountPhoto = user.photoUrl
-                        )
-                    }
-                    showToast("Connected device account: ${user.email}")
-                    if (settings.value.googleDriveAutoBackup) {
-                        backupToGoogleDrive(silent = true)
-                    }
-                }
-            } else {
-                val msg = res.exceptionOrNull()?.localizedMessage ?: "No account selected"
-                showToast(msg)
-            }
-        }
-    }
-
-    fun signOutGoogle(activity: android.app.Activity? = null) {
-        viewModelScope.launch {
-            val userEmail = (repository.googleAuthManager.authState.value as? com.example.data.sync.AuthState.SignedIn)?.user?.email
-            repository.googleAuthManager.signOut(activity)
-            if (!userEmail.isNullOrBlank()) {
-                repository.googleDriveService.clearAccountCache(userEmail)
-            }
-            repository.updateSettings {
-                it.copy(
-                    googleAccountEmail = null,
-                    googleAccountName = null,
-                    googleAccountPhoto = null
-                )
-            }
-            _googleSyncStatus.value = null
-            showToast("Signed out of Google")
-        }
-    }
-
-    fun backupToGoogleDrive(silent: Boolean = false) {
-        val currentUser = (repository.googleAuthManager.authState.value as? com.example.data.sync.AuthState.SignedIn)?.user
-        if (currentUser == null) {
-            if (!silent) showToast("Please sign in to Google to back up")
-            return
-        }
-        viewModelScope.launch {
-            _isGoogleSyncing.value = true
-            _googleSyncStatus.value = "Backing up to Google Drive..."
-            val res = repository.backupToGoogleDrive()
-            _isGoogleSyncing.value = false
-            when (res) {
-                is com.example.data.sync.DriveSyncResult.Success -> {
-                    _googleSyncStatus.value = "Cloud backup up to date"
-                    if (!silent) showToast("Notes backed up to Google Drive")
-                }
-                is com.example.data.sync.DriveSyncResult.Error -> {
-                    _googleSyncStatus.value = "Backup error: ${res.error}"
-                    if (!silent) showToast("Drive backup failed: ${res.error}")
-                }
-                else -> {}
-            }
-        }
-    }
-
-    fun restoreFromGoogleDrive() {
-        val currentUser = (repository.googleAuthManager.authState.value as? com.example.data.sync.AuthState.SignedIn)?.user
-        if (currentUser == null) {
-            showToast("Please sign in to Google to restore notes")
-            return
-        }
-        viewModelScope.launch {
-            _isGoogleSyncing.value = true
-            _googleSyncStatus.value = "Restoring from Google Drive..."
-            val res = repository.restoreFromGoogleDrive()
-            _isGoogleSyncing.value = false
-            when (res) {
-                is com.example.data.sync.DriveSyncResult.Restored -> {
-                    val summary = "Restored: ${res.newCount} new, ${res.updatedCount} updated, ${res.dupeCount} duplicates prevented"
-                    _googleSyncStatus.value = summary
-                    showToast(summary)
-                    _selectedFilter.value = "all"
-                    _searchQuery.value = ""
-                }
-                is com.example.data.sync.DriveSyncResult.Error -> {
-                    _googleSyncStatus.value = "Restore error: ${res.error}"
-                    showToast("Drive restore failed: ${res.error}")
-                }
-                else -> {}
-            }
-        }
-    }
-
-    fun toggleGoogleDriveAutoBackup(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(googleDriveAutoBackup = enabled) }
-        }
-    }
-
-    fun toggleDeleteFromStorageWhenDeleted(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(deleteFromStorageWhenDeleted = enabled) }
         }
     }
 

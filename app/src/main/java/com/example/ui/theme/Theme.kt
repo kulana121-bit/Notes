@@ -1,6 +1,9 @@
 package com.example.ui.theme
 
 import android.app.Activity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,11 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-
-import androidx.compose.runtime.remember
 
 private val DarkColorScheme = darkColorScheme(
     primary = AccentDark,
@@ -43,8 +45,6 @@ private val LightColorScheme = lightColorScheme(
 fun GlassNotesTheme(
     themeSetting: String = "auto", // "auto", "light", "dark"
     reduceTransparency: Boolean = false,
-    accentPaletteKey: String = "gold",
-    fontFamilyStyle: String = "sans",
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeSetting) {
@@ -53,38 +53,57 @@ fun GlassNotesTheme(
         else -> isSystemInDarkTheme()
     }
 
-    val palette = AccentPalettes[accentPaletteKey] ?: AccentPalettes["gold"]!!
-
-    val baseColors = if (darkTheme) {
-        DarkGlassColors.copy(
-            accent = palette.darkAccent,
-            accentSecondary = palette.darkSecondary,
-            chipOnBg = palette.chipOnBgDark,
-            chipOnTx = palette.chipOnTxDark
-        )
-    } else {
-        LightGlassColors.copy(
-            accent = palette.lightAccent,
-            accentSecondary = palette.lightSecondary,
-            chipOnBg = palette.chipOnBgLight,
-            chipOnTx = palette.chipOnTxLight
+    val targetColors = (if (darkTheme) DarkGlassColors else LightGlassColors).let { base ->
+        base.copy(
+            isReduced = reduceTransparency,
+            glass = if (reduceTransparency) (if (darkTheme) CardDark else CardLight) else (if (darkTheme) GlassDark else GlassLight)
         )
     }
 
-    val targetColors = baseColors.copy(
-        isReduced = reduceTransparency,
-        glass = if (reduceTransparency) (if (darkTheme) CardDark else CardLight) else (if (darkTheme) GlassDark else GlassLight)
+    // Fast, ultra-smooth and realistic 260ms color transition on theme change
+    val animSpec = tween<Color>(durationMillis = 260, easing = FastOutSlowInEasing)
+
+    val bgAnimated by animateColorAsState(targetColors.bg, animSpec, label = "bg")
+    val cardAnimated by animateColorAsState(targetColors.card, animSpec, label = "card")
+    val textAnimated by animateColorAsState(targetColors.text, animSpec, label = "text")
+    val textSecAnimated by animateColorAsState(targetColors.textSecondary, animSpec, label = "textSec")
+    val textTertAnimated by animateColorAsState(targetColors.textTertiary, animSpec, label = "textTert")
+    val hairlineAnimated by animateColorAsState(targetColors.hairline, animSpec, label = "hairline")
+    val accentAnimated by animateColorAsState(targetColors.accent, animSpec, label = "accent")
+    val accentSecAnimated by animateColorAsState(targetColors.accentSecondary, animSpec, label = "accentSec")
+    val chipOnBgAnimated by animateColorAsState(targetColors.chipOnBg, animSpec, label = "chipOnBg")
+    val chipOnTxAnimated by animateColorAsState(targetColors.chipOnTx, animSpec, label = "chipOnTx")
+    val glassAnimated by animateColorAsState(targetColors.glass, animSpec, label = "glass")
+    val glassBorderAnimated by animateColorAsState(targetColors.glassBorder, animSpec, label = "glassBorder")
+    val glassHighlightAnimated by animateColorAsState(targetColors.glassHighlight, animSpec, label = "glassHighlight")
+    val fieldAnimated by animateColorAsState(targetColors.field, animSpec, label = "field")
+    val markAnimated by animateColorAsState(targetColors.mark, animSpec, label = "mark")
+    val dangerAnimated by animateColorAsState(targetColors.danger, animSpec, label = "danger")
+    val shadowAnimated by animateColorAsState(targetColors.shadow, animSpec, label = "shadow")
+
+    val animatedGlassColors = GlassCustomColors(
+        bg = bgAnimated,
+        card = cardAnimated,
+        text = textAnimated,
+        textSecondary = textSecAnimated,
+        textTertiary = textTertAnimated,
+        hairline = hairlineAnimated,
+        accent = accentAnimated,
+        accentSecondary = accentSecAnimated,
+        chipOnBg = chipOnBgAnimated,
+        chipOnTx = chipOnTxAnimated,
+        glass = glassAnimated,
+        glassBorder = glassBorderAnimated,
+        glassHighlight = glassHighlightAnimated,
+        field = fieldAnimated,
+        mark = markAnimated,
+        danger = dangerAnimated,
+        shadow = shadowAnimated,
+        isDark = darkTheme,
+        isReduced = reduceTransparency
     )
 
-    val colorScheme = (if (darkTheme) DarkColorScheme else LightColorScheme).copy(
-        primary = targetColors.accent,
-        secondary = targetColors.accentSecondary,
-        tertiary = targetColors.chipOnTx
-    )
-
-    val typography = remember(fontFamilyStyle) {
-        getAppTypography(fontFamilyStyle)
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -97,11 +116,11 @@ fun GlassNotesTheme(
     }
 
     CompositionLocalProvider(
-        LocalGlassColors provides targetColors
+        LocalGlassColors provides animatedGlassColors
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = typography,
+            typography = Typography,
             content = content
         )
     }

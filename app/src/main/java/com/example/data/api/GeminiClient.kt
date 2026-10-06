@@ -137,8 +137,7 @@ object GeminiClient {
         query: String,
         mode: GeminiSearchMode,
         allNotes: List<NoteEntity> = emptyList(),
-        customKey: String? = null,
-        appName: String = "HTML Notes"
+        customKey: String? = null
     ): GeminiResult = withContext(Dispatchers.IO) {
         val apiKeys = parseApiKeys(customKey)
         if (apiKeys.isEmpty()) {
@@ -159,7 +158,7 @@ object GeminiClient {
             for ((modelIndex, modelName) in MODELS_TO_TRY.withIndex()) {
                 try {
                     val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent"
-                    val systemPrompt = buildSystemPrompt(mode, allNotes, appName)
+                    val systemPrompt = buildSystemPrompt(mode, allNotes)
                     val userPrompt = buildUserPrompt(query, mode, allNotes)
 
                     val jsonBody = JSONObject().apply {
@@ -268,10 +267,10 @@ object GeminiClient {
         fallbackLocalGeneration(query, mode, allNotes, errorNote = lastError ?: "API Error. Displaying smart local result.")
     }
 
-    private fun buildSystemPrompt(mode: GeminiSearchMode, notes: List<NoteEntity>, appName: String = "HTML Notes"): String {
+    private fun buildSystemPrompt(mode: GeminiSearchMode, notes: List<NoteEntity>): String {
         val basePrompt = when (mode) {
             GeminiSearchMode.ASK_NOTES -> """
-                You are an intelligent knowledge engine and AI assistant inside "$appName".
+                You are an intelligent knowledge engine and AI assistant inside "HTML Notes".
                 The user asks a question, requests information, or searches over their notes collection.
                 Rules:
                 1. Answer any question thoroughly, accurately, and helpfully using your knowledge.
@@ -326,7 +325,7 @@ object GeminiClient {
             """.trimIndent()
 
             GeminiSearchMode.GENERAL_AI -> """
-                You are Ai, an intelligent, helpful, and concise AI assistant inside $appName.
+                You are Ai, an intelligent, helpful, and concise AI assistant inside HTML Notes.
                 Provide clear, accurate, and insightful responses.
             """.trimIndent()
         }

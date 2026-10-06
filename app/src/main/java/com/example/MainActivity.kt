@@ -68,22 +68,10 @@ class MainActivity : ComponentActivity() {
                 lastKnownDark = effectiveDark
             }
 
-            LaunchedEffect(settings.appIconPreset) {
-                updateAppLauncherIcon(settings.appIconPreset)
-            }
-
-            LaunchedEffect(settings.customAppName) {
-                try {
-                    title = settings.customAppName
-                } catch (_: Throwable) {}
-            }
-
             CompositionLocalProvider(LocalThemeTransition provides themeTransitionState) {
                 GlassNotesTheme(
                     themeSetting = settings.theme,
-                    reduceTransparency = settings.reduceTransparency,
-                    accentPaletteKey = settings.accentPalette,
-                    fontFamilyStyle = settings.fontFamilyStyle
+                    reduceTransparency = settings.reduceTransparency
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -103,62 +91,6 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleIntent(intent)
-    }
-
-    private fun updateAppLauncherIcon(preset: String) {
-        try {
-            val pm = packageManager
-            val pkg = packageName
-            // Note: Component class in manifest is com.example.MainActivity* regardless of applicationId
-            val aliasMap = mapOf(
-                "default" to "com.example.MainActivityDefault",
-                "gold" to "com.example.MainActivityDefault",
-                "emerald" to "com.example.MainActivityEmerald",
-                "blue" to "com.example.MainActivityBlue",
-                "rose" to "com.example.MainActivityRose",
-                "purple" to "com.example.MainActivityPurple",
-                "crimson" to "com.example.MainActivityCrimson",
-                "cyan" to "com.example.MainActivityCyan",
-                "sunset" to "com.example.MainActivitySunset"
-            )
-
-            val activeAlias = aliasMap[preset] ?: "com.example.MainActivityDefault"
-
-            // Ensure target MainActivity is enabled
-            val mainComp = android.content.ComponentName(pkg, "com.example.MainActivity")
-            if (pm.getComponentEnabledSetting(mainComp) != android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                pm.setComponentEnabledSetting(
-                    mainComp,
-                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    android.content.pm.PackageManager.DONT_KILL_APP
-                )
-            }
-
-            // 1. Enable the active alias first so there is always an active launcher component
-            val activeComp = android.content.ComponentName(pkg, activeAlias)
-            if (pm.getComponentEnabledSetting(activeComp) != android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                pm.setComponentEnabledSetting(
-                    activeComp,
-                    android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    android.content.pm.PackageManager.DONT_KILL_APP
-                )
-            }
-
-            // 2. Disable all other inactive aliases
-            aliasMap.values.toSet().filter { it != activeAlias }.forEach { alias ->
-                val comp = android.content.ComponentName(pkg, alias)
-                if (pm.getComponentEnabledSetting(comp) != android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-                    pm.setComponentEnabledSetting(
-                        comp,
-                        android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        android.content.pm.PackageManager.DONT_KILL_APP
-                    )
-                }
-            }
-            android.util.Log.d("MainActivity", "Successfully set launcher icon to $activeAlias")
-        } catch (e: Throwable) {
-            android.util.Log.e("MainActivity", "Failed to switch launcher icon: ${e.message}", e)
-        }
     }
 
     private fun handleIntent(intent: Intent?) {

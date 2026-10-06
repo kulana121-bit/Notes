@@ -39,10 +39,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.ui.theme.GlassTheme
@@ -52,7 +50,7 @@ import com.example.util.VibrationHelper
 @Composable
 fun GlassBox(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(32.dp),
+    shape: Shape = RoundedCornerShape(24.dp),
     elevation: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {
@@ -126,8 +124,8 @@ fun ThemeToggleIconButton(
 ) {
     val colors = GlassTheme.colors
     val context = androidx.compose.ui.platform.LocalContext.current
-    val view = LocalView.current
     val themeTransition = LocalThemeTransition.current
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
 
     var buttonCenter by remember { androidx.compose.runtime.mutableStateOf(Offset.Unspecified) }
@@ -157,8 +155,9 @@ fun ThemeToggleIconButton(
                 indication = ripple(bounded = true, radius = size / 2),
                 onClick = {
                     VibrationHelper.click(context)
-                    val origin = if (buttonCenter.isSpecified) buttonCenter else Offset(800f, 150f)
-                    themeTransition.prepareTransition(origin, view, colors.bg)
+                    if (buttonCenter != Offset.Unspecified) {
+                        themeTransition.recordOrigin(buttonCenter)
+                    }
                     onClick()
                 }
             )

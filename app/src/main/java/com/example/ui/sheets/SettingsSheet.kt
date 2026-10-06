@@ -18,11 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.TextFields
@@ -30,12 +33,15 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -46,39 +52,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalView
 import com.example.data.api.GeminiClient
 import com.example.data.model.AppSettings
 import com.example.ui.theme.GlassTheme
 import com.example.ui.theme.LocalThemeTransition
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.ui.graphics.Brush
-import com.example.ui.theme.AccentPalettes
-import com.example.util.DateFormatter
 import com.example.util.VibrationHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,28 +80,17 @@ fun SettingsSheet(
     onSetPdfPageMode: (String) -> Unit = {},
     onSetPdfColorFilter: (String) -> Unit = {},
     onSetPdfRenderQuality: (String) -> Unit = {},
-    onSetCustomAppName: (String) -> Unit = {},
-    onSetAccentPalette: (String) -> Unit = {},
-    onSetAppIconPreset: (String) -> Unit = {},
-    onSetFontFamilyStyle: (String) -> Unit = {},
-    onResetCustomization: () -> Unit = {},
     onExportBackup: () -> Unit,
     onRestoreBackup: () -> Unit,
     onRemoveDuplicates: () -> Unit,
     onWipeAllNotes: () -> Unit,
-    onSetGeminiApiKey: (String) -> Unit = {},
-    onOpenSyncSheet: () -> Unit = {},
-    onBackupToDrive: () -> Unit = {},
-    onRestoreFromDrive: () -> Unit = {}
+    onSetDeleteFromStorageWhenDeleted: (Boolean) -> Unit = {},
+    onSetGeminiApiKey: (String) -> Unit = {}
 ) {
     val colors = GlassTheme.colors
-    val localContext = androidx.compose.ui.platform.LocalContext.current
     var deleteArmed by remember { mutableStateOf(false) }
     var showApiKeyDialog by remember { mutableStateOf(false) }
     var apiKeyDraft by remember(settings.geminiApiKey) { mutableStateOf(settings.geminiApiKey) }
-    var showEditAppNameDialog by remember { mutableStateOf(false) }
-    var appNameDraft by remember(settings.customAppName) { mutableStateOf(settings.customAppName) }
-    var showResetCustomizationDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -142,453 +116,6 @@ fun SettingsSheet(
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )
 
-            // Section: Customization & Branding
-            SectionHeader(title = "App Customization & Identity")
-
-            // Live Brand Preview Card
-            val activePalette = AccentPalettes[settings.accentPalette] ?: AccentPalettes["gold"]!!
-            val activeIconKey = if (settings.appIconPreset == "gold") "default" else settings.appIconPreset
-            val activeIconItem = LauncherIconsList.find { it.key == activeIconKey } ?: LauncherIconsList[0]
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(colors.field)
-                    .border(1.dp, colors.hairline, RoundedCornerShape(32.dp))
-                    .padding(14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Mini Launcher Icon Preview
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = activeIconItem.primaryColor.copy(alpha = 0.5f))
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(activeIconItem.primaryColor, activeIconItem.secondaryColor)
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Description,
-                            contentDescription = "App Icon",
-                            tint = Color.White,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = settings.customAppName,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.text
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(colors.chipOnBg)
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "Preview",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.chipOnTx
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Color badge
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(10.dp)
-                                        .clip(CircleShape)
-                                        .background(activePalette.previewColor)
-                                )
-                                Text(
-                                    text = activePalette.name,
-                                    fontSize = 12.sp,
-                                    color = colors.textSecondary
-                                )
-                            }
-
-                            Text(text = "•", fontSize = 12.sp, color = colors.textTertiary)
-
-                            Text(
-                                text = when (settings.fontFamilyStyle) {
-                                    "serif" -> "Serif Font"
-                                    "mono" -> "Mono Font"
-                                    else -> "Sans Font"
-                                },
-                                fontSize = 12.sp,
-                                color = colors.textSecondary
-                            )
-                        }
-                    }
-
-                    // Quick Edit Name Icon Button
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(colors.chipOnBg)
-                            .clickable {
-                                VibrationHelper.click(localContext)
-                                appNameDraft = settings.customAppName
-                                showEditAppNameDialog = true
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit App Name",
-                            tint = colors.chipOnTx,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
-
-            // 1. App Name Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .clickable {
-                        VibrationHelper.click(localContext)
-                        appNameDraft = settings.customAppName
-                        showEditAppNameDialog = true
-                    }
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsIcon(icon = Icons.Default.Edit)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "App Name & Header",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.text
-                    )
-                    Text(
-                        text = "Currently '${settings.customAppName}' • Tap to rename",
-                        fontSize = 12.5.sp,
-                        color = colors.textSecondary
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(colors.field)
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "Change",
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.accent
-                    )
-                }
-            }
-
-            // 2. Preset Accent Color Row
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SettingsIcon(icon = Icons.Default.Palette)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Preset Accent Colors",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.text
-                        )
-                        Text(
-                            text = "Applies across all UI buttons, chips, glow lines, and highlights",
-                            fontSize = 12.5.sp,
-                            color = colors.textSecondary
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Color Swatches Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AccentPalettes.forEach { (key, paletteColors) ->
-                        val isSelected = settings.accentPalette == key
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
-                                .clickable {
-                                    VibrationHelper.click(localContext)
-                                    onSetAccentPalette(key)
-                                }
-                                .padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .shadow(
-                                        elevation = if (isSelected) 8.dp else 2.dp,
-                                        shape = CircleShape,
-                                        spotColor = paletteColors.previewColor.copy(alpha = 0.6f)
-                                    )
-                                    .clip(CircleShape)
-                                    .background(paletteColors.previewColor)
-                                    .border(
-                                        width = if (isSelected) 3.5.dp else 1.5.dp,
-                                        color = if (isSelected) (if (colors.isDark) Color.White else Color(0xFF1E1E24)) else colors.hairline,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isSelected) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Selected",
-                                        tint = if (key == "gold") Color(0xFF221A00) else Color.White,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = paletteColors.name.split(" ").first(),
-                                fontSize = 11.5.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) colors.text else colors.textSecondary
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 3. App Launcher Icon Row
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SettingsIcon(icon = Icons.Default.Brush)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "App Launcher Icon",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.text
-                        )
-                        Text(
-                            text = "Changes your home screen app icon instantly",
-                            fontSize = 12.5.sp,
-                            color = colors.textSecondary
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Launcher Icons Horizontal Scroll
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    LauncherIconsList.forEach { iconItem ->
-                        val isSelected = (settings.appIconPreset == iconItem.key) ||
-                                (iconItem.key == "default" && settings.appIconPreset == "gold")
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
-                                .clickable {
-                                    VibrationHelper.click(localContext)
-                                    onSetAppIconPreset(iconItem.key)
-                                }
-                                .padding(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .shadow(
-                                        elevation = if (isSelected) 10.dp else 2.dp,
-                                        shape = RoundedCornerShape(24.dp),
-                                        spotColor = iconItem.primaryColor.copy(alpha = 0.6f)
-                                    )
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(
-                                        Brush.linearGradient(
-                                            listOf(iconItem.primaryColor, iconItem.secondaryColor)
-                                        )
-                                    )
-                                    .border(
-                                        width = if (isSelected) 3.5.dp else 1.dp,
-                                        color = if (isSelected) (if (colors.isDark) Color.White else Color(0xFF1E1E24)) else colors.hairline,
-                                        shape = RoundedCornerShape(24.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Description,
-                                    contentDescription = iconItem.name,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(26.dp)
-                                )
-
-                                if (isSelected) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomEnd)
-                                            .padding(3.dp)
-                                            .size(16.dp)
-                                            .clip(CircleShape)
-                                            .background(Color(0xFF34C759)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Check,
-                                            contentDescription = "Active",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(11.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = iconItem.name,
-                                fontSize = 11.5.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) colors.text else colors.textSecondary
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 4. App Typography Style Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsIcon(icon = Icons.Default.TextFields)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "App Typography",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.text
-                    )
-                    Text(
-                        text = "Font family for notes, headers, and menus",
-                        fontSize = 12.5.sp,
-                        color = colors.textSecondary
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(colors.field)
-                        .padding(2.dp)
-                ) {
-                    ThemeSegmentButton("Sans", settings.fontFamilyStyle == "sans") {
-                        onSetFontFamilyStyle("sans")
-                    }
-                    ThemeSegmentButton("Serif", settings.fontFamilyStyle == "serif") {
-                        onSetFontFamilyStyle("serif")
-                    }
-                    ThemeSegmentButton("Mono", settings.fontFamilyStyle == "mono") {
-                        onSetFontFamilyStyle("mono")
-                    }
-                }
-            }
-
-            // 5. Reset Customization to Defaults
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .clickable {
-                        VibrationHelper.click(localContext)
-                        showResetCustomizationDialog = true
-                    }
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsIcon(icon = Icons.Default.RestartAlt)
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Reset Customization",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.text
-                    )
-                    Text(
-                        text = "Restore default name, amber gold color, icon, and font",
-                        fontSize = 12.5.sp,
-                        color = colors.textSecondary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             // Section: Appearance
             SectionHeader(title = "Appearance")
 
@@ -611,7 +138,7 @@ fun SettingsSheet(
                 // Theme Segment
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -621,7 +148,78 @@ fun SettingsSheet(
                 }
             }
 
+            // Transparent Liquid Glass Effect
             val localContext = androidx.compose.ui.platform.LocalContext.current
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingsIcon(icon = Icons.Default.BlurOn)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Transparent Liquid Glass Effect",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.text
+                    )
+                    Text(
+                        text = "Frosted glass translucency, glossy reflections, and ambient depth",
+                        fontSize = 12.5.sp,
+                        color = colors.textSecondary
+                    )
+                }
+                Switch(
+                    checked = !settings.reduceTransparency,
+                    onCheckedChange = { isLiquidGlassOn ->
+                        VibrationHelper.click(localContext)
+                        onSetReduceTransparency(!isLiquidGlassOn)
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF34C759)
+                    )
+                )
+            }
+
+            // Realistic Haptic Feedback
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingsIcon(icon = Icons.Default.Vibration)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Realistic Haptic Feedback",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.text
+                    )
+                    Text(
+                        text = "Tactile vibration responses on taps, gestures, and note actions",
+                        fontSize = 12.5.sp,
+                        color = colors.textSecondary
+                    )
+                }
+                Switch(
+                    checked = settings.hapticsEnabled,
+                    onCheckedChange = { isEnabled ->
+                        onSetHapticsEnabled(isEnabled)
+                        if (isEnabled) {
+                            VibrationHelper.click(localContext)
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF34C759)
+                    )
+                )
+            }
 
             // Reading font size
             Row(
@@ -641,7 +239,7 @@ fun SettingsSheet(
                 )
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .background(colors.field)
                         .padding(2.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -650,7 +248,7 @@ fun SettingsSheet(
                         modifier = Modifier
                             .width(34.dp)
                             .height(32.dp)
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(9.dp))
                             .clickable { onSetReadingFontSize(settings.readingFontSize - 1) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -667,7 +265,7 @@ fun SettingsSheet(
                         modifier = Modifier
                             .width(34.dp)
                             .height(32.dp)
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(9.dp))
                             .clickable { onSetReadingFontSize(settings.readingFontSize + 1) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -703,7 +301,7 @@ fun SettingsSheet(
                 }
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -736,7 +334,7 @@ fun SettingsSheet(
                 }
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .background(colors.field)
                         .padding(2.dp)
                 ) {
@@ -755,7 +353,7 @@ fun SettingsSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .clickable {
                         apiKeyDraft = settings.geminiApiKey
                         showApiKeyDialog = true
@@ -778,7 +376,7 @@ fun SettingsSheet(
                         )
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(6.dp))
                                 .background(if (isKeyConnected) Color(0xFF10B981).copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f))
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
@@ -892,151 +490,8 @@ fun SettingsSheet(
                 )
             }
 
-            if (showEditAppNameDialog) {
-                AlertDialog(
-                    onDismissRequest = { showEditAppNameDialog = false },
-                    title = {
-                        Text(
-                            text = "Customize App Name",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.text
-                        )
-                    },
-                    text = {
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(
-                                text = "Enter the name you want displayed across headers, tabs, and notifications.",
-                                fontSize = 13.sp,
-                                color = colors.textSecondary
-                            )
-                            OutlinedTextField(
-                                value = appNameDraft,
-                                onValueChange = { if (it.length <= 25) appNameDraft = it },
-                                label = { Text("App Name") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Text(
-                                text = "Quick suggestions:",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textTertiary
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                listOf("HTML Notes", "Glass Vault", "Zen Notes", "Code Diary", "Pocket Notes").forEach { suggestion ->
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(24.dp))
-                                            .background(colors.field)
-                                            .border(1.dp, colors.hairline, RoundedCornerShape(24.dp))
-                                            .clickable {
-                                                appNameDraft = suggestion
-                                            }
-                                            .padding(horizontal = 8.dp, vertical = 5.dp)
-                                    ) {
-                                        Text(
-                                            text = suggestion,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = colors.text
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                val finalName = appNameDraft.trim().ifBlank { "HTML Notes" }
-                                onSetCustomAppName(finalName)
-                                showEditAppNameDialog = false
-                            }
-                        ) {
-                            Text("Save", fontWeight = FontWeight.Bold, color = colors.accent)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                showEditAppNameDialog = false
-                            }
-                        ) {
-                            Text("Cancel", color = colors.textSecondary)
-                        }
-                    }
-                )
-            }
-
-            if (showResetCustomizationDialog) {
-                AlertDialog(
-                    onDismissRequest = { showResetCustomizationDialog = false },
-                    title = {
-                        Text(
-                            text = "Reset Customization?",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.text
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = "This will restore the default app name ('HTML Notes'), Amber Gold accent color, default launcher icon, and standard sans-serif font.",
-                            fontSize = 13.5.sp,
-                            color = colors.textSecondary,
-                            lineHeight = 19.sp
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                onResetCustomization()
-                                appNameDraft = "HTML Notes"
-                                showResetCustomizationDialog = false
-                            }
-                        ) {
-                            Text("Reset", fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = { showResetCustomizationDialog = false }
-                        ) {
-                            Text("Cancel", color = colors.textSecondary)
-                        }
-                    }
-                )
-            }
-
             // Section: Library & Backup
-            SectionHeader(title = "Library & Cloud Sync")
-
-            val googleEmail = settings.googleAccountEmail
-            SettingsActionRow(
-                icon = Icons.Default.Cloud,
-                label = if (googleEmail != null) "Google Drive ($googleEmail)" else "Google Drive Cloud Backup",
-                sub = if (googleEmail != null) "Manage Google Drive cloud backup & restore" else "Connect Google account for cloud sync",
-                onClick = { onDismiss(); onOpenSyncSheet() }
-            )
-
-            if (googleEmail != null) {
-                SettingsActionRow(
-                    icon = Icons.Default.CloudDone,
-                    label = "Back up to Google Drive now",
-                    sub = if (settings.lastGoogleDriveBackupTime > 0L) {
-                        "Last backup: ${DateFormatter.fmtClock(settings.lastGoogleDriveBackupTime)}"
-                    } else {
-                        "Upload entire library to Google Drive"
-                    },
-                    onClick = { onDismiss(); onBackupToDrive() }
-                )
-            }
+            SectionHeader(title = "Library")
 
             SettingsActionRow(
                 icon = Icons.Default.Download,
@@ -1058,6 +513,38 @@ fun SettingsSheet(
                 sub = "Scans library and removes identical copies",
                 onClick = { onDismiss(); onRemoveDuplicates() }
             )
+
+            // Also delete original file from phone storage
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingsIcon(icon = Icons.Default.Delete)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Also delete original file from phone storage",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.text
+                    )
+                    Text(
+                        text = "Deletes source PDF/HTML files from device storage when deleted in app",
+                        fontSize = 12.5.sp,
+                        color = colors.textSecondary
+                    )
+                }
+                Switch(
+                    checked = settings.deleteFromStorageWhenDeleted,
+                    onCheckedChange = onSetDeleteFromStorageWhenDeleted,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF34C759)
+                    )
+                )
+            }
 
             // Storage row
             Row(
@@ -1096,7 +583,7 @@ fun SettingsSheet(
                 Box(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(10.dp))
                         .background(colors.danger.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1118,7 +605,7 @@ fun SettingsSheet(
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .background(colors.field)
                         .clickable {
                             if (!deleteArmed) {
@@ -1146,7 +633,7 @@ fun SettingsSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(colors.field)
                     .clickable { onDismiss() }
                     .padding(14.dp),
@@ -1184,7 +671,7 @@ private fun SettingsIcon(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(32.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(colors.field),
         contentAlignment = Alignment.Center
     ) {
@@ -1205,7 +692,6 @@ private fun ThemeSegmentButton(
 ) {
     val colors = GlassTheme.colors
     val context = androidx.compose.ui.platform.LocalContext.current
-    val view = LocalView.current
     val themeTransition = LocalThemeTransition.current
     var buttonCenter by remember { mutableStateOf(Offset.Unspecified) }
 
@@ -1216,12 +702,13 @@ private fun ThemeSegmentButton(
                 val sz = coords.size
                 buttonCenter = Offset(rootPos.x + sz.width / 2f, rootPos.y + sz.height / 2f)
             }
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(9.dp))
             .background(if (isSelected) colors.card else Color.Transparent)
             .clickable {
                 VibrationHelper.click(context)
-                val origin = if (buttonCenter != Offset.Unspecified) buttonCenter else Offset(500f, 500f)
-                themeTransition.prepareTransition(origin, view, colors.bg)
+                if (buttonCenter != Offset.Unspecified) {
+                    themeTransition.recordOrigin(buttonCenter)
+                }
                 onClick()
             }
             .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -1249,7 +736,7 @@ private fun SettingsActionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(14.dp))
             .clickable(
                 interactionSource = interaction,
                 indication = ripple(bounded = true),
@@ -1276,21 +763,3 @@ private fun SettingsActionRow(
         }
     }
 }
-
-private data class LauncherIconItem(
-    val key: String,
-    val name: String,
-    val primaryColor: Color,
-    val secondaryColor: Color
-)
-
-private val LauncherIconsList = listOf(
-    LauncherIconItem("default", "Amber", Color(0xFFF2B90C), Color(0xFF8F6400)),
-    LauncherIconItem("emerald", "Emerald", Color(0xFF10B981), Color(0xFF047857)),
-    LauncherIconItem("blue", "Royal Blue", Color(0xFF3B82F6), Color(0xFF1D4ED8)),
-    LauncherIconItem("rose", "Rose", Color(0xFFF43F5E), Color(0xFFBE123C)),
-    LauncherIconItem("purple", "Purple", Color(0xFF8B5CF6), Color(0xFF6D28D9)),
-    LauncherIconItem("crimson", "Crimson", Color(0xFFEF4444), Color(0xFFB91C1C)),
-    LauncherIconItem("cyan", "Cyan", Color(0xFF06B6D4), Color(0xFF0E7490)),
-    LauncherIconItem("sunset", "Sunset", Color(0xFFF97316), Color(0xFFC2410C))
-)

@@ -67,20 +67,18 @@ import com.example.ui.util.telegramBounceClickable
 fun ReaderModeSwitch(
     readerMode: String,
     onReaderModeChange: (String) -> Unit,
-    customAppName: String = "HTML Notes",
     modifier: Modifier = Modifier
 ) {
     val colors = GlassTheme.colors
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(colors.field)
             .padding(3.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val noteLabel = if (customAppName.length <= 10) customAppName else "Notes"
         val options = listOf(
-            "html" to noteLabel,
+            "html" to "HTML Notes",
             "pdf" to "PDF Drive"
         )
         options.forEach { (mode, label) ->
@@ -88,7 +86,7 @@ fun ReaderModeSwitch(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(9.dp))
                     .background(if (isSelected) colors.chipOnBg else Color.Transparent)
                     .telegramBounceClickable { onReaderModeChange(mode) }
                     .padding(vertical = 6.dp),
@@ -98,8 +96,6 @@ fun ReaderModeSwitch(
                     text = label,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     color = if (isSelected) colors.chipOnTx else colors.textSecondary
                 )
             }
@@ -123,7 +119,6 @@ fun GlassHeader(
     onOpenGemini: (query: String, mode: GeminiSearchMode) -> Unit,
     readerMode: String,
     onReaderModeChange: (String) -> Unit,
-    customAppName: String = "HTML Notes",
     modifier: Modifier = Modifier
 ) {
     val colors = GlassTheme.colors
@@ -175,7 +170,7 @@ fun GlassHeader(
                         exit = fadeOut()
                     ) {
                         Text(
-                            text = if (readerMode == "pdf") "PDF Drive" else customAppName,
+                            text = if (readerMode == "pdf") "PDF Drive" else "HTML Notes",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp
@@ -221,7 +216,7 @@ fun GlassHeader(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = if (readerMode == "pdf") "PDF Drive" else customAppName,
+                        text = if (readerMode == "pdf") "PDF Drive" else "HTML Notes",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 28.sp,
@@ -233,7 +228,6 @@ fun GlassHeader(
                     ReaderModeSwitch(
                         readerMode = readerMode,
                         onReaderModeChange = onReaderModeChange,
-                        customAppName = customAppName,
                         modifier = Modifier.width(180.dp)
                     )
                 }
@@ -251,7 +245,7 @@ fun GlassHeader(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = if (readerMode == "pdf") "PDF Drive" else customAppName,
+                            text = if (readerMode == "pdf") "PDF Drive" else "HTML Notes",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 20.sp
@@ -262,7 +256,6 @@ fun GlassHeader(
                         ReaderModeSwitch(
                             readerMode = readerMode,
                             onReaderModeChange = onReaderModeChange,
-                            customAppName = customAppName,
                             modifier = Modifier.width(150.dp)
                         )
                     }
@@ -297,7 +290,7 @@ fun GlassHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(44.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(colors.field)
                     .border(
                         1.dp,
@@ -307,7 +300,7 @@ fun GlassHeader(
                                 Color(0xFFA855F7).copy(alpha = sparkleGlow)
                             )
                         ) else SolidColor(colors.glassBorder),
-                        RoundedCornerShape(24.dp)
+                        RoundedCornerShape(14.dp)
                     )
                     .padding(start = 12.dp, end = 6.dp),
                 contentAlignment = Alignment.CenterStart
@@ -367,7 +360,7 @@ fun GlassHeader(
                     // Gemini AI Sparkle Button in Search Bar
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(
                                 Brush.linearGradient(
                                     listOf(
@@ -454,16 +447,54 @@ fun GlassHeader(
                     }
                 }
 
-                FilterChipItem(
-                    label = "All",
-                    isSelected = selectedFilter == "all",
-                    onClick = { onFilterChange("all") }
-                )
-                FilterChipItem(
-                    label = "Pinned",
-                    isSelected = selectedFilter == "pinned",
-                    onClick = { onFilterChange("pinned") }
-                )
+                if (readerMode == "pdf") {
+                    FilterChipItem(
+                        label = "All PDFs",
+                        isSelected = selectedFilter == "all",
+                        onClick = { onFilterChange("all") }
+                    )
+                    FilterChipItem(
+                        label = "Pinned",
+                        isSelected = selectedFilter == "pinned",
+                        onClick = { onFilterChange("pinned") }
+                    )
+                    FilterChipItem(
+                        label = "Recent",
+                        isSelected = selectedFilter == "recent",
+                        onClick = { onFilterChange("recent") }
+                    )
+                    FilterChipItem(
+                        label = "Imported",
+                        isSelected = selectedFilter == "imported",
+                        onClick = { onFilterChange("imported") }
+                    )
+                    FilterChipItem(
+                        label = "Documents",
+                        isSelected = selectedFilter == "docs",
+                        onClick = { onFilterChange("docs") }
+                    )
+                } else {
+                    FilterChipItem(
+                        label = "All",
+                        isSelected = selectedFilter == "all",
+                        onClick = { onFilterChange("all") }
+                    )
+                    FilterChipItem(
+                        label = "Text",
+                        isSelected = selectedFilter == "text",
+                        onClick = { onFilterChange("text") }
+                    )
+                    FilterChipItem(
+                        label = "HTML",
+                        isSelected = selectedFilter == "html",
+                        onClick = { onFilterChange("html") }
+                    )
+                    FilterChipItem(
+                        label = "Pinned",
+                        isSelected = selectedFilter == "pinned",
+                        onClick = { onFilterChange("pinned") }
+                    )
+                }
 
                 categories.forEach { cat ->
                     FilterChipItem(

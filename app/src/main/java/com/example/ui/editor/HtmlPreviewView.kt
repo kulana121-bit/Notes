@@ -49,8 +49,8 @@ fun HtmlPreviewView(
             .then(
                 if (!isZenMode) {
                     Modifier
-                        .clip(RoundedCornerShape(32.dp))
-                        .border(1.dp, colors.hairline, RoundedCornerShape(32.dp))
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, colors.hairline, RoundedCornerShape(18.dp))
                 } else Modifier
             )
     ) {
